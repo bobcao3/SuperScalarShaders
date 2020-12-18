@@ -1,0 +1,30 @@
+const int volume_width = 80;
+const int volume_height = 80;
+const int volume_depth = 36;
+
+const int volume_depth_grid_width = 6;
+const int volume_depth_grid_height = 6;
+
+ivec3 getVolumePos(vec3 world_pos, vec3 world_camera_pos)
+{
+    return ivec3(floor(world_pos + mod(world_camera_pos, 1.0))) + ivec3(volume_width, volume_depth, volume_height) / 2;
+}
+
+ivec2 volume2planar(ivec3 pos)
+{
+    if (pos.x < 0 || pos.x >= volume_width || pos.y < 0 || pos.y >= volume_depth || pos.z < 0 || pos.z >= volume_height) return ivec2(-1);
+
+    ivec2 base = ivec2((pos.y % volume_depth_grid_width) * volume_width, (pos.y / volume_depth_grid_width) * volume_height);
+    ivec2 uv = base + pos.xz;
+
+    return uv;
+}
+
+ivec3 planar2volume(ivec2 uv)
+{
+    ivec2 y_grid = uv / ivec2(volume_width, volume_height);
+    ivec2 xz_pos = uv % ivec2(volume_width, volume_height);
+    ivec3 wpos = ivec3(xz_pos.x, y_grid.x + y_grid.y * volume_depth_grid_width, xz_pos.y);
+
+    return wpos;
+}
