@@ -73,8 +73,8 @@ void main()
 
     float z_priority = 0.0f;
 
-    if (vertex_in[0].block_id > 199) z_priority = 0.2;
-    if (vertex_in[0].block_id > 28 && vertex_in[0].block_id < 33) z_priority = 0.1;
+    if (vertex_in[0].block_id > 199) z_priority = 0.1;
+    if (vertex_in[0].block_id > 28 && vertex_in[0].block_id < 33) z_priority = 0.2;
 
     gl_Position = vec4(projed_dot, z_priority, 1.0);
     vertex_color = average_color;
