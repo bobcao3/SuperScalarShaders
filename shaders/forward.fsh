@@ -323,27 +323,23 @@ void main()
                     ivec3 volume_pos_prev = getVolumePos(sample_pos, cameraPosition) + ioffset;
                     ivec2 planar_pos_prev = volume2planar(volume_pos_prev);
                     
-                    hitcolor = texelFetch(shadowcolor0, planar_pos, 0).rgb * max(fogColor * 0.1, texelFetch(gaux2, planar_pos_prev, 0).rgb);
+                    hitcolor = texelFetch(shadowcolor0, planar_pos, 0).rgb * max(fogColor * 0.1 * lmcoord.y, texelFetch(gaux2, planar_pos_prev, 0).rgb);
                     break;
                 }
             }
         }
         
         if (!hit) {
-            image_based_lighting += texture(gaux3, project_skybox2uv(sample_dir), 3).rgb;
+            image_based_lighting += pow(lmcoord.y, 2.0) * texture(gaux3, project_skybox2uv(sample_dir), 3).rgb;
         } else {
             image_based_lighting += hitcolor;
         }
         #else
-        image_based_lighting += texture(gaux3, project_skybox2uv(sample_dir), 3).rgb;
+        image_based_lighting += pow(lmcoord.y, 3.0) * texture(gaux3, project_skybox2uv(sample_dir), 3).rgb * vertex_color.a;
         #endif
     }
 
-    #ifdef VOXEL_RAYTRACED_AO
-    lighting += pow(lmcoord.y, 2.0) * image_based_lighting * 3.0;
-    #else
-    lighting += pow(lmcoord.y, 3.0) * image_based_lighting * vertex_color.a * 3.0;
-    #endif
+    lighting += image_based_lighting * 3.0;
 
     #ifdef WATER
     lighting /= color.a;
