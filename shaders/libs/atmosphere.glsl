@@ -85,6 +85,8 @@ void densities(in vec3 pos, out vec2 des) {
 	des.x += exp(-abs(h - 25e3) /  15e3) * 0.15;
 
 	des.y = exp(-h/Hm);
+
+	// des.y += exp(-max(0.0, h/(Hm * 0.5))) * 5.0 * rainStrength;
 }
 
 float densitiesCloud(in vec3 pos) {
@@ -264,25 +266,25 @@ vec4 scatter(vec3 o, vec3 d, vec3 Ds, float lmax, float nseed) {
 	vec3 R = vec3(0.0), M = vec3(0.0), Mc = vec3(0.0);
 	vec3 R_moon = vec3(0.0), M_moon = vec3(0.0), Mc_moon = vec3(0.0);
 
-	// for (int i = 0; i < CLOUD_STEPS; ++i) {
-	// 	float dl, l;
+	for (int i = 0; i < CLOUD_STEPS; ++i) {
+		float dl, l;
 
-	// 	dl = (cloudMaxL - cloudMinL) / float(CLOUD_STEPS);
-	// 	l = cloudMinL + dl * float(i + nseed * 2.0 - 1.0);
+		dl = (cloudMaxL - cloudMinL) / float(CLOUD_STEPS);
+		l = cloudMinL + dl * float(i + nseed * 2.0 - 1.0);
 
-	// 	vec3 p = o + d * l;
+		vec3 p = o + d * l;
 
-	// 	vec2 des;
-	// 	densities(p, des);
-	// 	des.y += densitiesCloud(p);
+		vec2 des;
+		densities(p, des);
+		des.y += densitiesCloud(p);
 
-	// 	des *= vec2(dl);
-	// 	depth += des;
+		des *= vec2(dl);
+		depth += des;
 
-	// 	vec3 Ri, Mi, Mci;
-	// 	inScatter(p, Ds, Ra, depth, des, nseed, Ri, Mi); R += Ri; M += Mi;
-	// 	inScatter(p, -Ds, Ra, depth, des, nseed, Ri, Mi); R_moon += Ri; M_moon += Mi;
-	// }
+		vec3 Ri, Mi, Mci;
+		inScatter(p, Ds, Ra, depth, des, nseed, Ri, Mi); R += Ri; M += Mi;
+		inScatter(p, -Ds, Ra, depth, des, nseed, Ri, Mi); R_moon += Ri; M_moon += Mi;
+	}
 
 	float u0 = - (L - cloudMaxL - 1.0) / (1.0 - exp2(steps));
 	for (int i = 0; i < steps; ++i) {

@@ -282,13 +282,6 @@ void main()
     
     color.rgb = fromGamma(color.rgb);
 
-#ifdef WATER
-    color.a = 0.3 * pow(1.0 - max(0.0, dot(-world_dir, normal)), 5.0) + 0.7 * color.a;
-
-    image_based_lighting = texture(gaux3, project_skybox2uv(reflection_dir)).rgb;
-
-    lighting_additive += lmcoord.y * image_based_lighting / color.a;
-#else
     vec3 world_sun_dir = mat3(gbufferModelViewInverse) * sunPosition * 0.01;
 
     float NdotL = max(0.0, dot(normal, world_sun_dir));
@@ -351,8 +344,10 @@ void main()
     #else
     lighting += pow(lmcoord.y, 3.0) * image_based_lighting * vertex_color.a * 3.0;
     #endif
-#endif
 
+    #ifdef WATER
+    lighting /= color.a;
+    #endif
 
     if (block_id < 200)
     {
