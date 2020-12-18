@@ -351,7 +351,7 @@ void main()
                 {
                     hit = true;
                     
-                    ivec3 volume_pos_prev = getVolumePos(sample_pos, cameraPosition) + ioffset;
+                    ivec3 volume_pos_prev = getVolumePos(sample_pos - sample_dir * 0.5, cameraPosition) + ioffset;
                     ivec2 planar_pos_prev = volume2planar(volume_pos_prev);
                     
                     hitcolor = texelFetch(shadowcolor0, planar_pos, 0).rgb * max(fogColor * lmcoord.y * 0.3, texelFetch(gaux2, planar_pos_prev, 0).rgb * 10.0);
@@ -360,9 +360,17 @@ void main()
 
             }
         }
-        
+
+        vec3 approxSkylight = pow(lmcoord.y, 2.0) * texture(gaux3, project_skybox2uv(sample_dir), 3).rgb * 3.0;
+
+        if (dot(sample_dir, vertex_normal) <= 0.0)
+        {
+            hit = true;
+            hitcolor = approxSkylight * color.rgb;
+        }
+
         if (!hit) {
-            image_based_lighting += pow(lmcoord.y, 2.0) * texture(gaux3, project_skybox2uv(sample_dir), 3).rgb * 3.0;
+            image_based_lighting += approxSkylight;
         } else {
             image_based_lighting += hitcolor;
         }
