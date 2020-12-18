@@ -219,6 +219,34 @@ vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness)
     return normalize(sampleVec);
 }
 
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow5(max(1.0 - cosTheta, 0.001));
+}
+
+bool match(float a, float b)
+{
+	return (a > b - 0.002 && a < b + 0.002);
+}
+
+vec3 getF(float metalic, float cosTheta)
+{
+	if (metalic < 229.5 / 255.0)
+		return vec3(1.0);
+
+	#include "materials.glsl"
+
+	cosTheta = max(0.01, abs(cosTheta));
+
+	vec3 NcosTheta = 2.0 * N * cosTheta;
+	float cosTheta2 = cosTheta * cosTheta;
+	vec3 N2K2 = N * N + K * K;
+
+	vec3 Rs = (N2K2 - NcosTheta + cosTheta2) / (N2K2 + NcosTheta + cosTheta2);
+	vec3 Rp = (N2K2 * cosTheta2 - NcosTheta + 1.0) / (N2K2 * cosTheta2 + NcosTheta + 1.0);
+
+	return (Rs + Rp) * 0.5;
+}
+
 uniform sampler2D specular;
 
 uniform vec3 fogColor;
@@ -285,6 +313,7 @@ void main()
     vec3 world_sun_dir = mat3(gbufferModelViewInverse) * sunPosition * 0.01;
 
     float NdotL = max(0.0, dot(normal, world_sun_dir));
+    float NdotV = max(0.0, dot(normal, -world_dir));
 
     vec4 materials = texture(specular, uv);
 
@@ -294,6 +323,8 @@ void main()
 
     float hash1d = texelFetch(gaux4, ivec2(gl_FragCoord.st + WeylNth(frameCounter & 0xFF) * 16) & 0xFF, 0).r;    
     float rand1d = hash1d * 65536.0;// + float(frameCounter & 0xFF);
+
+    vec3 F = getF(materials.g, NdotV); //fresnelSchlickRoughness(NdotV, getF(materials.g, NdotV), roughness);
 
     for (int i = 0; i < LIGHTING_SAMPLES; i++)
     {
@@ -326,6 +357,7 @@ void main()
                     hitcolor = texelFetch(shadowcolor0, planar_pos, 0).rgb * max(fogColor * 0.1 * lmcoord.y, texelFetch(gaux2, planar_pos_prev, 0).rgb);
                     break;
                 }
+
             }
         }
         
@@ -339,7 +371,7 @@ void main()
         #endif
     }
 
-    lighting += image_based_lighting * 3.0;
+    lighting += image_based_lighting * 3.0 * F;
 
     #ifdef WATER
     lighting /= color.a;
