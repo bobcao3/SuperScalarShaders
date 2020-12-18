@@ -288,7 +288,7 @@ void main()
 
     vec4 materials = texture(specular, uv);
 
-    float roughness = 1.0 - pow2(materials.r);
+    float roughness = 1.0 - materials.r;
 
     #define LIGHTING_SAMPLES 4 // [4 8 16]
 
@@ -299,14 +299,14 @@ void main()
     {
         vec2 rand2d = WeylNth(int(rand1d) * LIGHTING_SAMPLES + i);
 
-        vec3 H = ImportanceSampleGGX(rand2d, normal, 1.0 - materials.r);
+        vec3 H = ImportanceSampleGGX(rand2d, normal, roughness);
         vec3 sample_dir = normalize(2.0 * dot(-world_dir, H) * H + world_dir);
 
         #ifdef VOXEL_RAYTRACED_AO
         bool hit = false;
         vec3 hitcolor = vec3(0.0);
 
-        if (dot(sample_dir, vertex_normal) > 0.0)
+        if ((fade_distance < 1.0) && (dot(sample_dir, vertex_normal) > 0.0))
         {
             for (int j = 0; j < 4; j++)
             {
@@ -340,7 +340,7 @@ void main()
     }
 
     #ifdef VOXEL_RAYTRACED_AO
-    lighting += pow(lmcoord.y, 3.0) * image_based_lighting * 3.0;
+    lighting += pow(lmcoord.y, 2.0) * image_based_lighting * 3.0;
     #else
     lighting += pow(lmcoord.y, 3.0) * image_based_lighting * vertex_color.a * 3.0;
     #endif
