@@ -1,7 +1,7 @@
 attribute vec3 mc_Entity;
 attribute vec4 mc_midTexCoord;
 
-#ifdef NORMAL_MAPPING
+#if defined(NORMAL_MAPPING) || defined(WATER)
 attribute vec4 at_tangent;
 #endif
 
@@ -12,7 +12,7 @@ out VertexOut {
     flat int block_id;
     vec2 uv;
     vec2 lmcoord;
-#ifdef NORMAL_MAPPING
+#if defined(NORMAL_MAPPING) || defined(WATER)
     vec3 tangent;
     vec3 bitangent;
 #endif
@@ -36,6 +36,8 @@ uniform float frameTimeCounter;
 
 #ifdef WATER
 #include "/libs/water.glsl"
+
+uniform vec3 cameraPosition;
 #endif
 
 void main()
@@ -47,6 +49,7 @@ void main()
 #ifdef NON_BLOCK
     vec3 world_normal = normalize(mat3(gbufferModelViewInverse) * (mat3(gl_NormalMatrix) * gl_Normal.xyz));
 #else
+
     vec3 world_normal = normalize(gl_Normal.xyz);
 
     #if defined(WAVING_FOILAGE)
@@ -74,7 +77,6 @@ void main()
     #endif
 #endif
 
-
     vec4 view_pos = gl_ModelViewMatrix * vertex;
     vec4 proj_pos = gl_ProjectionMatrix * view_pos;
     world_position = gbufferModelViewInverse * view_pos;
@@ -82,7 +84,7 @@ void main()
 #ifdef WATER
     if (mc_Entity.x == 32.0)
     {
-        float wave = getwave(world_position.xyz, 1.0, 2);
+        float wave = getwave(world_position.xyz + cameraPosition, 1.0, WATER_ITERATIONS);
         vertex.y = vertex.y + wave;
 
         view_pos = gl_ModelViewMatrix * vertex;
@@ -93,7 +95,7 @@ void main()
 
     uv = gl_MultiTexCoord0.st;
 
-#ifdef NORMAL_MAPPING
+#if defined(NORMAL_MAPPING) || defined(WATER)
     tangent = normalize(at_tangent.xyz * at_tangent.w);
     bitangent = normalize(cross(tangent, world_normal));
 #endif

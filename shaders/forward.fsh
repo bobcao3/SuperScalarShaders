@@ -5,7 +5,7 @@ in VertexOut {
     flat int block_id;
     vec2 uv;
     vec2 lmcoord;
-#ifdef NORMAL_MAPPING
+#if defined(NORMAL_MAPPING) || defined(WATER)
     vec3 tangent;
     vec3 bitangent;
 #endif
@@ -147,6 +147,12 @@ vec3 sample_lighting_bilinear(sampler2D tex, vec3 world_pos, ivec3 ioffset)
 
 uniform int frameCounter;
 
+#ifdef WATER
+uniform float frameTimeCounter;
+
+#include "/libs/water.glsl"
+#endif
+
 #ifdef VOXEL_RAYTRACED_AO
 uniform sampler2D shadowcolor0;
 
@@ -248,8 +254,6 @@ vec3 getF(float metalic, float roughness, float cosTheta)
 
 uniform sampler2D specular;
 
-uniform vec3 fogColor;
-
 void main()
 {
     vec3 normal = vertex_normal;
@@ -266,6 +270,10 @@ void main()
     normal_map = mat3(tangent, bitangent, normal) * normal_map;
     if (normal_map.xy != vec2(0.0))
         normal = normal_map;
+#endif
+
+#ifdef WATER
+    normal = get_water_normal(world_position.xyz + cameraPosition, 1.0, vertex_normal, tangent, bitangent);
 #endif
 
     vec3 sample_pos_smooth = world_position.xyz + normal * 0.51 + mod(cameraPosition, 1.0);
@@ -319,7 +327,7 @@ void main()
     float roughness = 1.0 - materials.r;
 
     #ifdef WATER
-    if (block_id == 32) roughness = 0.02;
+    if (block_id == 32) roughness = 0.01;
     #endif
 
     #define LIGHTING_SAMPLES 4 // [4 8 16]
@@ -351,7 +359,11 @@ void main()
         {
             for (int j = 0; j < 4; j++)
             {
-                vec3 sample_pos = world_position.xyz + vertex_normal * 0.2 + sample_dir * (float(j) + hash1d);
+                #ifdef WATER
+                vec3 sample_pos = world_position.xyz + vertex_normal * 0.5 + sample_dir * (float(j) + hash1d);
+                #else
+                vec3 sample_pos = world_position.xyz + vertex_normal * 0.1 + sample_dir * (float(j) + hash1d);
+                #endif
                 ivec3 volume_pos = getVolumePos(sample_pos, cameraPosition);// + ioffset;
                 ivec2 planar_pos = volume2planar(volume_pos);
 
@@ -368,10 +380,9 @@ void main()
                     ivec3 volume_pos_prev = getVolumePos(sample_pos - sample_dir * 0.5, cameraPosition) + ioffset;
                     ivec2 planar_pos_prev = volume2planar(volume_pos_prev);
 
-                    hitcolor *= max(fogColor * pow(lmcoord.y, 2.0) * 0.3, texelFetch(gaux2, planar_pos_prev, 0).rgb * 10.0);
+                    hitcolor *= max(skyColor * pow(lmcoord.y, 2.0) * 0.3, texelFetch(gaux2, planar_pos_prev, 0).rgb * 10.0);
                     break;
                 }
-
             }
         }
 
@@ -380,7 +391,7 @@ void main()
         if (dot(sample_dir, vertex_normal) <= 0.0)
         {
             hit = true;
-            hitcolor = approxSkylight;// * color.rgb;
+            hitcolor = approxSkylight * color.rgb;
         }
 
         if (!hit) {

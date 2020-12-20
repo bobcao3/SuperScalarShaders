@@ -25,11 +25,14 @@ void main()
     vec4 color = vertex_color;
     color.a *= texture(tex, uv).a;
 
-    vec4 lighting = texelFetch(gaux2, volume2planar(getVolumePos(world_position.xyz, cameraPosition)), 0);
-    
-    color.rgb = fromGamma(color.rgb);
-    color.rgb *= max(fogColor, lighting.rgb * 10.0);
-    color.rgb = toGamma(color.rgb);
+    if (color.a > 0.1)
+    {
+        vec4 lighting = texelFetch(gaux2, volume2planar(getVolumePos(world_position.xyz, cameraPosition)), 0);
+        
+        color.rgb = fromGamma(color.rgb);
+        color.rgb *= max(fogColor, lighting.rgb * 10.0);
+        color.rgb = toGamma(color.rgb);
+    }
 
     gl_FragData[0] = color;
 }

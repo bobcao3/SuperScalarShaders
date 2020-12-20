@@ -12,7 +12,7 @@ void main()
 {
     ivec2 iuv = ivec2(gl_FragCoord.st);
 
-    if (iuv.x <= (int(viewWidth) >> 2) && iuv.y > (int(viewHeight) >> 2))
+    if (iuv.x <= (int(viewWidth) >> 2) && iuv.y >= (int(viewHeight) >> 2))
     {
         vec4 skybox = vec4(0.0);
     

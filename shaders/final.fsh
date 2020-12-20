@@ -26,7 +26,7 @@ void main()
 
     color = ACESFitted(color) * 1.1;
 
-    // if (iuv.x < 1024 && iuv.y < 1024) color = texelFetch(gaux1, iuv, 0).rgb;
+    // if (iuv.x < 1024 && iuv.y < 1024) color = texelFetch(gaux3, iuv, 0).rgb;
 
     gl_FragColor = vec4(color, 1.0);
 }

@@ -1,7 +1,7 @@
 // sea
 #define SEA_HEIGHT 0.3 // [0.1 0.2 0.3 0.4 0.5]
 
-#define WATER_ITERATIONS 6
+#define WATER_ITERATIONS 4
 
 #define WATER_PARALLAX
 
@@ -13,7 +13,7 @@ float sea_octave_micro(vec2 fuv, float choppy) {
 	return pow(1.0-pow(wv.x * wv.y,0.75),choppy);
 }
 
-const float SEA_CHOPPY = 5.5;
+const float SEA_CHOPPY = 3.5;
 const float SEA_SPEED = 5.3;
 const float SEA_FREQ = 0.08;
 const mat2 octave_m = mat2(1.4,1.1,-1.2,1.4);
