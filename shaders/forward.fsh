@@ -295,7 +295,7 @@ void main()
 
     lighting = mix(lighting, fade_lighting, fade_distance);
 
-    if (lmcoord.x >= 0.968)
+    if (lmcoord.x >= 0.9685)
     {
         lighting = vec3(1.0);
     }
