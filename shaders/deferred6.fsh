@@ -21,9 +21,9 @@ void main()
 {
     ivec2 iuv = ivec2(gl_FragCoord.st);
 
-    vec4 skybox = texelFetch(gaux3, iuv, 0);
-
     if (iuv.y <= (int(viewHeight) >> 3) + 8 && iuv.x <= (int(viewWidth) >> 2) + 8) {
+        vec4 skybox = vec4(0.0);
+    
         if (biomeCategory != 16) {
             vec3 dir = project_uv2skybox(vec2(iuv) * invWidthHeight);
             vec3 world_sun_dir = mat3(gbufferModelViewInverse) * (sunPosition * 0.01);
@@ -32,7 +32,7 @@ void main()
         } else {
             skybox = vec4(fromGamma(fogColor), 0.0);
         }
-    }
 
-    gl_FragData[0] = skybox;
+        gl_FragData[0] = skybox;
+    }
 }

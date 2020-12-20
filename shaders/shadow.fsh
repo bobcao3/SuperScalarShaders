@@ -12,8 +12,6 @@ uniform sampler2D tex;
 
 void main()
 {
-    // if (block_id == 0) discard;
-
     float transparency = 0.5;
     float emmisive = 1.0;
 
@@ -40,6 +38,5 @@ void main()
     else if (lmcoord.x > 0.95)
         emmisive = 0.9;
 
-    gl_FragData[0] = vec4(color, transparency);
-    gl_FragData[1] = vec4(emmisive, 0.0, 0.0, 0.5);
+    gl_FragColor = vec4(color, transparency);
 }

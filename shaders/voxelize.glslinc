@@ -1,9 +1,11 @@
-const int volume_width = 80;
-const int volume_height = 80;
-const int volume_depth = 36;
+const int volume_width = 128;
+const int volume_height = 128;
+const int volume_depth = 64;
 
-const int volume_depth_grid_width = 6;
-const int volume_depth_grid_height = 6;
+const int volume_depth_grid_width = 8;
+const int volume_depth_grid_height = 8;
+
+const int shadowMapResolution = 1024;
 
 ivec3 getVolumePos(vec3 world_pos, vec3 world_camera_pos)
 {

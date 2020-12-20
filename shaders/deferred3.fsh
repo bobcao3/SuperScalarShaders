@@ -2,7 +2,7 @@
 
 #pragma optimize(on)
 
-/* DRAWBUFFERS: 45 */
+/* DRAWBUFFERS: 4 */
 
 const bool gaux1Clear = false;
 const bool gaux2Clear = false;

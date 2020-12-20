@@ -7,7 +7,6 @@
 const float shadowDistance = 64.0f;
 const float shadowDistanceRenderMul = 1.0f;
 const float shadowIntervalSize = 1.0f;
-const int shadowMapResolution = 512;
 
 const int colortex0Format = R11F_G11F_B10F;
 const int colortex2Format = R11F_G11F_B10F;
@@ -46,32 +45,6 @@ vec3 sampleHistory(ivec2 iuv, vec3 min_bound, vec3 max_bound)
 
 uniform int frameCounter;
 
-vec3 sample_lighting_bilinear(sampler2D tex, vec3 world_pos, ivec3 ioffset)
-{
-    vec3 spos = world_pos - 0.5;
-
-    vec3 interp = fract(spos);
-
-    ivec3 base_pos = ivec3(floor(spos)) + ioffset;
-
-    vec4 center = texelFetch(tex, volume2planar(ivec3(floor(world_pos)) + (volume_width / 2)), 0);
-
-    vec4 c000 = texelFetch(tex, volume2planar(base_pos + ivec3(0, 0, 0) + (volume_width / 2)), 0); c000.rgb = mix(c000.rgb, center.rgb, c000.a);
-    vec4 c001 = texelFetch(tex, volume2planar(base_pos + ivec3(0, 0, 1) + (volume_width / 2)), 0); c001.rgb = mix(c001.rgb, center.rgb, c001.a);
-    vec4 c010 = texelFetch(tex, volume2planar(base_pos + ivec3(0, 1, 0) + (volume_width / 2)), 0); c010.rgb = mix(c010.rgb, center.rgb, c010.a);
-    vec4 c011 = texelFetch(tex, volume2planar(base_pos + ivec3(0, 1, 1) + (volume_width / 2)), 0); c011.rgb = mix(c011.rgb, center.rgb, c011.a);
-    vec4 c100 = texelFetch(tex, volume2planar(base_pos + ivec3(1, 0, 0) + (volume_width / 2)), 0); c100.rgb = mix(c100.rgb, center.rgb, c100.a);
-    vec4 c101 = texelFetch(tex, volume2planar(base_pos + ivec3(1, 0, 1) + (volume_width / 2)), 0); c101.rgb = mix(c101.rgb, center.rgb, c101.a);
-    vec4 c110 = texelFetch(tex, volume2planar(base_pos + ivec3(1, 1, 0) + (volume_width / 2)), 0); c110.rgb = mix(c110.rgb, center.rgb, c110.a);
-    vec4 c111 = texelFetch(tex, volume2planar(base_pos + ivec3(1, 1, 1) + (volume_width / 2)), 0); c111.rgb = mix(c111.rgb, center.rgb, c111.a);
-
-    return 
-        mix( mix( mix(c000.rgb, c001.rgb, interp.z),
-                  mix(c100.rgb, c101.rgb, interp.z), interp.x),
-             mix( mix(c010.rgb, c011.rgb, interp.z),
-                  mix(c110.rgb, c111.rgb, interp.z), interp.x), interp.y);
-}
-
 uniform vec3 fogColor;
 
 uniform int biomeCategory;
@@ -109,7 +82,7 @@ void main() {
             vec3 wpos = step_dir * step_length * (float(i) + dither + 0.05);
 
             vec3 rand_offset = vec3(hash(vec2(i * 3, dither * 10.0)), hash(vec2(i * 3 + 1, dither * 10.0)), hash(vec2(i * 3 + 2, dither * 10.0)));
-            vec3 spos = wpos + (vec3(volume_width, volume_height, volume_depth) * 0.5) + mod(cameraPosition, 1.0) + rand_offset - 0.5;
+            vec3 spos = wpos + (vec3(volume_width, volume_depth, volume_height) * 0.5) + mod(cameraPosition, 1.0) + rand_offset - 0.5;
 
             vec3 voxel_sample = texelFetch(gaux2, volume2planar(ivec3(spos)), 0).rgb;
             // sample_lighting_bilinear(gaux2, wpos + mod(cameraPosition, 1.0), ivec3(0));

@@ -32,13 +32,11 @@ uniform int frameCounter;
 uniform float rainStrength;
 uniform float frameTimeCounter;
 
-float hash(float n) { return fract(sin(n) * 43758.5453123); }
+#include "/libs/noise.glsl"
 
-float hash(vec2 p) {
-	vec3 p3 = fract(vec3(p.xyx) * 0.2031);
-	p3 += dot(p3, p3.yzx + 19.19);
-	return fract((p3.x + p3.y) * p3.z);
-}
+#ifdef WATER
+#include "/libs/water.glsl"
+#endif
 
 void main()
 {
@@ -76,16 +74,22 @@ void main()
     #endif
 #endif
 
-#ifdef WATER
-    if (mc_Entity.x == 32.0)
-    {
-        float wave = cos(hash(vertex.xz) + frameTimeCounter * 3.0);
-        vertex.y = vertex.y - 0.2 + wave * 0.1;
-    }
-#endif
 
     vec4 view_pos = gl_ModelViewMatrix * vertex;
     vec4 proj_pos = gl_ProjectionMatrix * view_pos;
+    world_position = gbufferModelViewInverse * view_pos;
+
+#ifdef WATER
+    if (mc_Entity.x == 32.0)
+    {
+        float wave = getwave(world_position.xyz, 1.0, 2);
+        vertex.y = vertex.y + wave;
+
+        view_pos = gl_ModelViewMatrix * vertex;
+        proj_pos = gl_ProjectionMatrix * view_pos;
+        world_position = gbufferModelViewInverse * view_pos;
+    }
+#endif
 
     uv = gl_MultiTexCoord0.st;
 
@@ -93,8 +97,6 @@ void main()
     tangent = normalize(at_tangent.xyz * at_tangent.w);
     bitangent = normalize(cross(tangent, world_normal));
 #endif
-
-    world_position = gbufferModelViewInverse * view_pos;
 
 #ifdef POM
 	mat3 TBN = mat3(tangent, bitangent, world_normal);

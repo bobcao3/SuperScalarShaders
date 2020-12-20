@@ -49,7 +49,6 @@ uniform vec3 skyColor;
 #define _INCLUDE_BUFFERS
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
-uniform sampler2D shadowtex1;
 #ifndef GBUFFERS_WATER
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;

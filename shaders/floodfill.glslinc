@@ -1,5 +1,5 @@
 uniform sampler2D shadowcolor0;
-uniform sampler2D shadowcolor1;
+uniform sampler2D shadowtex0;
 
 uniform sampler2D gaux1;
 
@@ -58,9 +58,9 @@ void main()
 
             vec3 sample_color = texelFetch(gaux1, planar_pos_sample, 0).rgb;
             vec4 sample_voxel_color = texelFetch(shadowcolor0, planar_pos_sample, 0).rgba;
-            vec4 sample_attribute = texelFetch(shadowcolor1, planar_pos_sample, 0).rgba;
+            float sample_attribute = texelFetch(shadowtex0, planar_pos_sample, 0).r;
 
-            bool sample_is_emmisive = sample_attribute.r > 0.1 && sample_attribute.r != 1.0;
+            bool sample_is_emmisive = sample_attribute.r == 0.55;
             bool sample_is_air = sample_voxel_color.a == 1.0;
 
             if (sample_is_air) sample_color.rgb *= sample_voxel_color.rgb;

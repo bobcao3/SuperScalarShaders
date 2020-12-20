@@ -22,7 +22,6 @@ uniform sampler2D tex;
 uniform sampler2D gaux1;
 // uniform sampler2D gaux2;
 // uniform sampler2D gaux3;
-// uniform sampler2D lightmap;
 
 /* DRAWBUFFERS: 0 */
 
@@ -228,10 +227,10 @@ bool match(float a, float b)
 	return (a > b - 0.002 && a < b + 0.002);
 }
 
-vec3 getF(float metalic, float cosTheta)
+vec3 getF(float metalic, float roughness, float cosTheta)
 {
 	if (metalic < 229.5 / 255.0)
-		return vec3(1.0);
+		return fresnelSchlickRoughness(cosTheta, vec3(1.0 - metalic), roughness);
 
 	#include "materials.glsl"
 
@@ -274,7 +273,7 @@ void main()
 #ifdef WATER
     ivec3 ioffset = ivec3(0);
 #else
-    ivec3 ioffset = -ivec3(previousCameraPosition) + ivec3(cameraPosition);
+    ivec3 ioffset = ivec3(floor(cameraPosition) - floor(previousCameraPosition));
 #endif
 
     vec3 fade_distances = smoothstep(vec3(volume_width, volume_depth, volume_height) * 0.4f, vec3(volume_width, volume_depth, volume_height) * 0.5f, abs(world_position.xyz));
@@ -296,7 +295,7 @@ void main()
 
     lighting = mix(lighting, fade_lighting, fade_distance);
 
-    if (lmcoord.x >= 0.95)
+    if (lmcoord.x >= 0.968)
     {
         lighting = vec3(1.0);
     }
@@ -307,7 +306,7 @@ void main()
     vec3 reflection_dir = reflect(world_dir, normal);
 
     vec4 color = texture(tex, uv) * vertex_color;
-    
+
     color.rgb = fromGamma(color.rgb);
 
     vec3 world_sun_dir = mat3(gbufferModelViewInverse) * sunPosition * 0.01;
@@ -319,12 +318,16 @@ void main()
 
     float roughness = 1.0 - materials.r;
 
+    #ifdef WATER
+    if (block_id == 32) roughness = 0.02;
+    #endif
+
     #define LIGHTING_SAMPLES 4 // [4 8 16]
 
-    float hash1d = texelFetch(gaux4, ivec2(gl_FragCoord.st + WeylNth(frameCounter & 0xFF) * 16) & 0xFF, 0).r;    
+    float hash1d = texelFetch(gaux4, ivec2(gl_FragCoord.st + WeylNth(frameCounter & 0xFFFF) * 256) & 0xFF, 0).r;    
     float rand1d = hash1d * 65536.0;// + float(frameCounter & 0xFF);
 
-    vec3 F = getF(materials.g, NdotV); //fresnelSchlickRoughness(NdotV, getF(materials.g, NdotV), roughness);
+    vec3 F = getF(materials.g, roughness, NdotV);
 
     for (int i = 0; i < LIGHTING_SAMPLES; i++)
     {
@@ -333,9 +336,16 @@ void main()
         vec3 H = ImportanceSampleGGX(rand2d, normal, roughness);
         vec3 sample_dir = normalize(2.0 * dot(-world_dir, H) * H + world_dir);
 
+        vec2 skybox_uv = project_skybox2uv(sample_dir);
+        
+        if (roughness > 0.5)
+        {
+            skybox_uv.x += 0.25 + 8.0 * invWidthHeight.x;
+        }
+
         #ifdef VOXEL_RAYTRACED_AO
         bool hit = false;
-        vec3 hitcolor = vec3(0.0);
+        vec3 hitcolor = vec3(1.0);
 
         if ((fade_distance < 1.0) && (dot(sample_dir, vertex_normal) > 0.0))
         {
@@ -347,35 +357,39 @@ void main()
 
                 if (planar_pos == ivec2(-1)) break;
 
-                if (texelFetch(shadowcolor0, planar_pos, 0).a < 1.0)
+                vec4 voxel_color = texelFetch(shadowcolor0, planar_pos, 0);
+
+                hitcolor *= voxel_color.rgb;
+
+                if (voxel_color.a < 1.0)
                 {
                     hit = true;
                     
                     ivec3 volume_pos_prev = getVolumePos(sample_pos - sample_dir * 0.5, cameraPosition) + ioffset;
                     ivec2 planar_pos_prev = volume2planar(volume_pos_prev);
-                    
-                    hitcolor = texelFetch(shadowcolor0, planar_pos, 0).rgb * max(fogColor * lmcoord.y * 0.3, texelFetch(gaux2, planar_pos_prev, 0).rgb * 10.0);
+
+                    hitcolor *= max(fogColor * pow(lmcoord.y, 2.0) * 0.3, texelFetch(gaux2, planar_pos_prev, 0).rgb * 10.0);
                     break;
                 }
 
             }
         }
 
-        vec3 approxSkylight = pow(lmcoord.y, 2.0) * texture(gaux3, project_skybox2uv(sample_dir), 3).rgb * 3.0;
+        vec3 approxSkylight = pow(lmcoord.y, 2.0) * texture(gaux3, skybox_uv, 3).rgb * 3.0;
 
         if (dot(sample_dir, vertex_normal) <= 0.0)
         {
             hit = true;
-            hitcolor = approxSkylight * color.rgb;
+            hitcolor = approxSkylight;// * color.rgb;
         }
 
         if (!hit) {
-            image_based_lighting += approxSkylight;
+            image_based_lighting += hitcolor * approxSkylight;
         } else {
             image_based_lighting += hitcolor;
         }
         #else
-        image_based_lighting += pow(lmcoord.y, 3.0) * texture(gaux3, project_skybox2uv(sample_dir), 3).rgb * vertex_color.a * 3.0;
+        image_based_lighting += pow(lmcoord.y, 3.0) * texture(gaux3, skybox_uv, 3).rgb * vertex_color.a * 3.0;
         #endif
     }
 
@@ -398,7 +412,7 @@ void main()
 
     color.rgb = toGamma(color.rgb);
 
-    // color.rgb = lighting * 0.3;
+    // color.rgb = lighting;
 
     gl_FragData[0] = color;
 }
