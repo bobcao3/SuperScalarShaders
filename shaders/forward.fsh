@@ -140,8 +140,6 @@ vec3 sample_lighting_bilinear(sampler2D tex, vec3 world_pos, ivec3 ioffset)
                   mix(c110.rgb, c111.rgb, interp.z), interp.x), interp.y);
 }
 
-#define VOXEL_RAYTRACED_AO
-
 #include "/libs/noise.glsl"
 #include "/libs/taa.glsl"
 
@@ -155,6 +153,8 @@ uniform float frameTimeCounter;
 
 #ifdef VOXEL_RAYTRACED_AO
 uniform sampler2D shadowcolor0;
+
+#define RAYTRACE_DISTANCE 4 // [2 4 8 16 32 64]
 
 mat3 make_coord_space(vec3 n) {
     vec3 h = n;
@@ -235,8 +235,8 @@ bool match(float a, float b)
 
 vec3 getF(float metalic, float roughness, float cosTheta)
 {
-	if (metalic < 229.5 / 255.0)
-		return fresnelSchlickRoughness(cosTheta, vec3(1.0 - metalic), roughness);
+	if (metalic < (229.5 / 255.0))
+		return fresnelSchlickRoughness(cosTheta, vec3(1.0 - metalic * (229.0 / 255.0)), roughness);
 
 	#include "materials.glsl"
 
@@ -253,6 +253,8 @@ vec3 getF(float metalic, float roughness, float cosTheta)
 }
 
 uniform sampler2D specular;
+
+uniform sampler2D shadowtex0;
 
 void main()
 {
@@ -273,7 +275,7 @@ void main()
 #endif
 
 #ifdef WATER
-    normal = get_water_normal(world_position.xyz + cameraPosition, 1.0, vertex_normal, tangent, bitangent);
+    if (block_id == 32) normal = get_water_normal(world_position.xyz + cameraPosition, 1.0, vertex_normal, tangent, bitangent);
 #endif
 
     vec3 sample_pos_smooth = world_position.xyz + normal * 0.51 + mod(cameraPosition, 1.0);
@@ -295,7 +297,7 @@ void main()
 #else
     if (fade_distance < 1.0)
     {
-        lighting = sample_lighting_bilinear(gaux2, sample_pos_smooth, ioffset) * 10.0;
+        lighting = sample_lighting_bilinear(gaux2, sample_pos_smooth, ioffset);
     }
 #endif
 
@@ -327,7 +329,12 @@ void main()
     float roughness = 1.0 - materials.r;
 
     #ifdef WATER
-    if (block_id == 32) roughness = 0.01;
+    if (block_id == 32)
+    {
+        roughness = 0.01;
+        materials.g = 0.89;
+        color.rgb = vertex_color.rgb * 0.5 + 0.5;
+    }
     #endif
 
     #define LIGHTING_SAMPLES 4 // [4 8 16]
@@ -357,7 +364,7 @@ void main()
 
         if ((fade_distance < 1.0) && (dot(sample_dir, vertex_normal) > 0.0))
         {
-            for (int j = 0; j < 4; j++)
+            for (int j = 0; j < RAYTRACE_DISTANCE; j++)
             {
                 #ifdef WATER
                 vec3 sample_pos = world_position.xyz + vertex_normal * 0.5 + sample_dir * (float(j) + hash1d);
@@ -370,17 +377,18 @@ void main()
                 if (planar_pos == ivec2(-1)) break;
 
                 vec4 voxel_color = texelFetch(shadowcolor0, planar_pos, 0);
+                float voxel_attribute = texelFetch(shadowtex0, planar_pos, 0).r;
 
                 hitcolor *= voxel_color.rgb;
 
-                if (voxel_color.a < 1.0)
+                if (voxel_color.a < 1.0 || (voxel_attribute > 0.54 && voxel_attribute < 0.56))
                 {
                     hit = true;
                     
                     ivec3 volume_pos_prev = getVolumePos(sample_pos - sample_dir * 0.5, cameraPosition) + ioffset;
                     ivec2 planar_pos_prev = volume2planar(volume_pos_prev);
 
-                    hitcolor *= max(skyColor * pow(lmcoord.y, 2.0) * 0.3, texelFetch(gaux2, planar_pos_prev, 0).rgb * 10.0);
+                    hitcolor *= max(skyColor * pow(lmcoord.y, 2.0) * 0.3, texelFetch(gaux2, planar_pos_prev, 0).rgb);
                     break;
                 }
             }
@@ -391,7 +399,7 @@ void main()
         if (dot(sample_dir, vertex_normal) <= 0.0)
         {
             hit = true;
-            hitcolor = approxSkylight * color.rgb;
+            hitcolor = approxSkylight * color.rgb * roughness;
         }
 
         if (!hit) {
@@ -418,6 +426,13 @@ void main()
     {
         color.rgb += color.rgb * lighting;
     }
+
+    #ifdef WATER
+    if (block_id == 32)
+    {
+        color.a = F.g * 0.7 + 0.3;
+    }
+    #endif
 
     color.rgb += lighting_additive;
 

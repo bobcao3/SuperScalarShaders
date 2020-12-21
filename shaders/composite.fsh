@@ -12,7 +12,7 @@ const int colortex0Format = R11F_G11F_B10F;
 const int colortex2Format = R11F_G11F_B10F;
 
 const int gaux1Format = R11F_G11F_B10F;
-const int gaux2Format = RGB10_A2;
+const int gaux2Format = RGBA16F;
 const int gaux3Format = R11F_G11F_B10F;
 
 const float sunPathRotation = -43.0f;

@@ -2,10 +2,5 @@
 
 #define VOXEL_RAYTRACED_AO
 
-#pragma optimize(on)
-
-#define NORMAL_MAPPING
-#define POM
-
 #include "/libs/compat.glsl"
 #include "forward.fsh"

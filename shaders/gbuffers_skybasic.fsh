@@ -23,7 +23,7 @@ void main()
 {
     vec4 color = vec4(0.0);
 
-    if (vertex_color.r > 0.3)
+    if (max(abs(vertex_color.r - vertex_color.g), abs(vertex_color.r - vertex_color.b)) < 0.01)
         color = vertex_color;
 
     vec3 world_dir = normalize(world_position.xyz);

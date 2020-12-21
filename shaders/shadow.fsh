@@ -19,8 +19,6 @@ void main()
 
     if (block_id > 199) emmisive = 0.9;
 
-    // if (fluid == 2) discard;
-
     vec3 color = texture(tex, uv, 3).rgb * vertex_color.rgb;
 
     if (block_id == 30)
@@ -35,8 +33,8 @@ void main()
         color = vec3(154.0, 43.0, 35.0) / 255.0;
     else if (block_id == 234)
         color = vec3(254.0, 227.0, 255.0) / 255.0;
-    // else if (lmcoord.x > 0.9685)
-    //     emmisive = 0.9;
+    else if (lmcoord.x > 0.9685)
+        emmisive = 0.9;
 
     gl_FragColor = vec4(color, transparency);
 }

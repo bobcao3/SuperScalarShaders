@@ -1,7 +1,7 @@
 // sea
 #define SEA_HEIGHT 0.3 // [0.1 0.2 0.3 0.4 0.5]
 
-#define WATER_ITERATIONS 4
+#define WATER_ITERATIONS 4 // [1 2 3 4 5 6]
 
 #define WATER_PARALLAX
 

@@ -74,7 +74,7 @@ void main()
     #ifdef FINAL_PROP
     if (voxel_solid != 1.0)
     {
-        gl_FragData[1] = vec4(voxel_color * texelFetch(shadowcolor0, planar_pos, 0).rgb * 0.1, voxel_solid);
+        gl_FragData[1] = vec4(voxel_color * texelFetch(shadowcolor0, planar_pos, 0).rgb, voxel_solid);
     }
     #endif
 }
