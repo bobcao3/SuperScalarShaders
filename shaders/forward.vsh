@@ -5,6 +5,8 @@ attribute vec4 mc_midTexCoord;
 attribute vec4 at_tangent;
 #endif
 
+// #define WIREFRAME
+
 out VertexOut {
     vec4 vertex_color;
     vec4 world_position;
@@ -18,6 +20,10 @@ out VertexOut {
 #endif
 #ifdef POM
     vec3 tangentpos;
+#endif
+
+#ifdef WIREFRAME
+    vec4 bary;
 #endif
 };
 
@@ -75,6 +81,17 @@ void main()
         }
     }
     #endif
+#endif
+
+#ifdef WIREFRAME
+    if (gl_VertexID % 4 == 0)
+        bary = vec4(1.0, 0.0, 0.0, 0.0);
+    else if (gl_VertexID % 4 == 1)
+        bary = vec4(0.0, 1.0, 0.0, 0.0);
+    else if (gl_VertexID % 4 == 2)
+        bary = vec4(0.0, 0.0, 1.0, 0.0);
+    else
+        bary = vec4(0.0, 1.0, 0.0, 0.0);
 #endif
 
     vec4 view_pos = gl_ModelViewMatrix * vertex;

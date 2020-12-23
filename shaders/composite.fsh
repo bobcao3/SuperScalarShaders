@@ -79,7 +79,8 @@ void main() {
 
         for (int i = 0; i < 10; i++)
         {
-            vec3 wpos = step_dir * step_length * (float(i) + dither + 0.05);
+            float L = step_length * (float(i) + dither + 0.05);
+            vec3 wpos = step_dir * L;
 
             vec3 rand_offset = vec3(hash(vec2(i * 3, dither * 10.0)), hash(vec2(i * 3 + 1, dither * 10.0)), hash(vec2(i * 3 + 2, dither * 10.0)));
             vec3 spos = wpos + (vec3(volume_width, volume_depth, volume_height) * 0.5) + mod(cameraPosition, 1.0) + rand_offset - 0.5;
@@ -87,7 +88,7 @@ void main() {
             vec3 voxel_sample = texelFetch(gaux2, volume2planar(ivec3(spos)), 0).rgb;
             // sample_lighting_bilinear(gaux2, wpos + mod(cameraPosition, 1.0), ivec3(0));
 
-            current += voxel_sample * step_length * 0.3;
+            current += voxel_sample * step_length * exp(-L * 0.001) * 0.1;
         }
     }
     

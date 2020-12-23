@@ -8,11 +8,13 @@
 
 #include "/libs/atmosphere.glsl"
 
+uniform int frameCounter;
+
 void main()
 {
     ivec2 iuv = ivec2(gl_FragCoord.st);
 
-    if (iuv.x <= (int(viewWidth) >> 2) && iuv.y >= (int(viewHeight) >> 2))
+    if (iuv.x <= (int(viewWidth) >> 2) && iuv.y >= (int(viewHeight) >> 2) && frameCounter % 2 == 0)
     {
         vec4 skybox = vec4(0.0);
     
@@ -21,5 +23,7 @@ void main()
         skybox.ba = vec2(0.0);
     
         gl_FragData[0] = skybox;
+    } else {
+        discard;
     }
 }

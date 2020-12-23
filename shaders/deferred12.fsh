@@ -19,9 +19,15 @@ uniform vec3 fogColor;
 
 // uniform sampler2D gaux3;
 
+uniform int frameCounter;
+
 void main()
 {
     ivec2 iuv = ivec2(gl_FragCoord.st);
+
+    if (frameCounter % 5 != 0) {
+        discard;
+    }
 
     vec4 skybox = vec4(0.0);
 

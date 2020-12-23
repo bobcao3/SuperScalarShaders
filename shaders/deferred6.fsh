@@ -17,11 +17,13 @@ uniform int biomeCategory;
 
 uniform vec3 fogColor;
 
+uniform int frameCounter;
+
 void main()
 {
     ivec2 iuv = ivec2(gl_FragCoord.st);
 
-    if (iuv.y <= (int(viewHeight) >> 3) + 8 && iuv.x <= (int(viewWidth) >> 2) + 8) {
+    if (iuv.y <= (int(viewHeight) >> 3) + 8 && iuv.x <= (int(viewWidth) >> 2) + 8 && frameCounter % 2 == 0) {
         vec4 skybox = vec4(0.0);
     
         if (biomeCategory != 16) {
@@ -34,5 +36,7 @@ void main()
         }
 
         gl_FragData[0] = skybox;
+    } else {
+        discard;
     }
 }

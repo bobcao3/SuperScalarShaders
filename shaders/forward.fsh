@@ -1,3 +1,6 @@
+// #define WIREFRAME
+// #define WIREFRAME_ONLY
+
 in VertexOut {
     vec4 vertex_color;
     vec4 world_position;
@@ -11,6 +14,10 @@ in VertexOut {
 #endif
 #ifdef POM
     vec3 tangentpos;
+#endif
+
+#ifdef WIREFRAME
+    vec4 bary;
 #endif
 };
 
@@ -32,8 +39,7 @@ uniform sampler2D gaux1;
 // uniform vec3 cameraPosition;
 // uniform vec3 previousCameraPosition;
 
-// uniform vec3 skyColor;
-
+uniform vec3 fogColor;
 
 #ifdef POM
 #define tileResolution 128 // [16 32 64 128 256 512 1024]
@@ -256,6 +262,9 @@ uniform sampler2D specular;
 
 uniform sampler2D shadowtex0;
 
+uniform int heldBlockLightValue;
+uniform int heldBlockLightValue2;
+
 void main()
 {
     vec3 normal = vertex_normal;
@@ -298,6 +307,12 @@ void main()
     if (fade_distance < 1.0)
     {
         lighting = sample_lighting_bilinear(gaux2, sample_pos_smooth, ioffset);
+
+        int handLightLevel = max(heldBlockLightValue, heldBlockLightValue2);
+        float handLightLevel_f = float(handLightLevel) * (1.0 / 240.0);
+        float world_distance = length(world_position.xyz);
+        float attenuation = 1.0 / ((1.0 + world_distance) * (1.0 + world_distance));
+        lighting = max(lighting, attenuation * handLightLevel_f * vec3(1.0, 0.8, 0.5) * 10.0);
     }
 #endif
 
@@ -329,10 +344,11 @@ void main()
     float roughness = 1.0 - materials.r;
 
     #ifdef WATER
+    roughness = 0.01;
+    materials.g = 0.89;
+    
     if (block_id == 32)
     {
-        roughness = 0.01;
-        materials.g = 0.89;
         color.rgb = vertex_color.rgb * 0.5 + 0.5;
     }
     #endif
@@ -388,19 +404,23 @@ void main()
                     ivec3 volume_pos_prev = getVolumePos(sample_pos - sample_dir * 0.5, cameraPosition) + ioffset;
                     ivec2 planar_pos_prev = volume2planar(volume_pos_prev);
 
-                    hitcolor *= max(skyColor * pow(lmcoord.y, 2.0) * 0.3, texelFetch(gaux2, planar_pos_prev, 0).rgb);
+                    hitcolor *= max(fogColor * pow(lmcoord.y, 2.0) * 0.3, texelFetch(gaux2, planar_pos_prev, 0).rgb);
                     break;
                 }
             }
+        } else {
+            hitcolor *= vertex_color.a;
         }
 
         vec3 approxSkylight = pow(lmcoord.y, 2.0) * texture(gaux3, skybox_uv, 3).rgb * 3.0;
 
+        #ifndef WATER
         if (dot(sample_dir, vertex_normal) <= 0.0)
         {
             hit = true;
             hitcolor = approxSkylight * color.rgb * roughness;
         }
+        #endif
 
         if (!hit) {
             image_based_lighting += hitcolor * approxSkylight;
@@ -435,6 +455,27 @@ void main()
     #endif
 
     color.rgb += lighting_additive;
+
+#ifdef WIREFRAME
+    float outlineWidth = 0.05;
+
+    #ifndef WIREFRAME_ONLY
+    if (bary.x < outlineWidth || bary.y < outlineWidth || bary.z < outlineWidth) {
+        color.rgb = vec3(0.0, 0.4, 1.0);
+        color.a = 1.0;
+    }
+    #else
+    if (bary.x < outlineWidth || bary.y < outlineWidth || bary.z < outlineWidth) {
+        if (color.a < 0.1)
+        {
+            color.rgb = vec3(1.0, 0.0, 1.0);
+        }
+        color.a = 1.0;
+    } else {
+        discard;
+    }
+    #endif
+#endif
 
     color.rgb = toGamma(color.rgb);
 
