@@ -14,6 +14,8 @@ in VertexOut {
 #endif
 #ifdef POM
     vec3 tangentpos;
+    vec2 miduv;
+    flat vec2 bound_uv;
 #endif
 
 #ifdef WIREFRAME
@@ -42,43 +44,6 @@ uniform sampler2D gaux1;
 uniform vec3 fogColor;
 
 #ifdef POM
-#define tileResolution 128 // [16 32 64 128 256 512 1024]
-
-uniform ivec2 atlasSize;
-
-vec2 tileResolutionF = vec2(tileResolution) / atlasSize;
-
-vec2 minCoord = vec2(uv.x - mod(uv.x, tileResolutionF.x), uv.y - mod(uv.y, tileResolutionF.y));
-vec2 maxCoord = minCoord + tileResolutionF;
-
-vec2 atlas_offset(in vec2 coord, in vec2 offset) {
-	vec2 offsetCoord = coord + mod(offset.xy, tileResolutionF);
-
-	offsetCoord.x -= float(offsetCoord.x > maxCoord.x) * tileResolutionF.x;
-	offsetCoord.x += float(offsetCoord.x < minCoord.x) * tileResolutionF.x;
-
-	offsetCoord.y -= float(offsetCoord.y > maxCoord.y) * tileResolutionF.y;
-	offsetCoord.y += float(offsetCoord.y < minCoord.y) * tileResolutionF.y;
-
-	return offsetCoord;
-}
-
-ivec2 atlas_offset(in ivec2 coord, in ivec2 offset, int lodi) {
-    int tileResLod = (tileResolution >> lodi);
-
-	ivec2 offsetCoord = coord + offset.xy % tileResLod;
-
-    ivec2 minCoordi = coord - coord % tileResLod;
-    ivec2 maxCoordi = minCoordi + tileResLod;
-
-	offsetCoord.x -= int(offsetCoord.x >= maxCoordi.x) * tileResLod;
-	offsetCoord.x += int(offsetCoord.x < minCoordi.x) * tileResLod;
-
-	offsetCoord.y -= int(offsetCoord.y >= maxCoordi.y) * tileResLod;
-	offsetCoord.y += int(offsetCoord.y < minCoordi.y) * tileResLod;
-
-	return offsetCoord;
-}
 
 vec2 ParallaxMapping(in vec2 coord) {
 	vec2 adjusted = coord.st;
@@ -87,9 +52,11 @@ vec2 ParallaxMapping(in vec2 coord) {
 
 	float heightmap = texture(normals, coord.st).a - 1.0f;
 
+    vec3 uv_dir = (tangentpos);
+    vec2 rect_size = abs(bound_uv - miduv);
+
 	vec3 offset = vec3(0.0f, 0.0f, 0.0f);
-	vec3 s = normalize(tangentpos);
-	s = s / s.z * scale / POM_STEPS;
+	vec3 s = uv_dir / uv_dir.z * (0.5 * scale / POM_STEPS);
 
 	float lazyx = 0.5;
 	const float lazyinc = 0.5 / POM_STEPS;
@@ -101,9 +68,11 @@ vec2 ParallaxMapping(in vec2 coord) {
 			offset += (heightmap - prev) * lazyx * s;
 			lazyx += lazyinc;
 
-			adjusted = atlas_offset(coord.st, offset.st);
-			heightmap = texture(normals, adjusted).a - 1.0f;
-			if (max(0.0, offset.z - heightmap) < 0.05) break;
+			vec2 offset_from_mid = coord + offset.st - miduv;
+            adjusted = miduv + mod(abs(offset_from_mid), rect_size) * sign(offset_from_mid);
+		
+        	heightmap = texture(normals, adjusted).a - 1.0f;
+			if (max(0.0, offset.z - heightmap) < 0.01) break;
 		}
 	}
 
@@ -242,7 +211,11 @@ bool match(float a, float b)
 vec3 getF(float metalic, float roughness, float cosTheta)
 {
 	if (metalic < (229.5 / 255.0))
-		return fresnelSchlickRoughness(cosTheta, vec3(1.0 - metalic * (229.0 / 255.0)), roughness);
+    {
+        float metalic_generated = 1.0 - metalic * (229.0 / 255.0);
+        metalic_generated = pow(metalic_generated, 2.0);
+		return fresnelSchlickRoughness(cosTheta, vec3(metalic_generated), roughness);
+    }
 
 	#include "materials.glsl"
 

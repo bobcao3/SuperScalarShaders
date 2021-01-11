@@ -20,6 +20,8 @@ out VertexOut {
 #endif
 #ifdef POM
     vec3 tangentpos;
+    vec2 miduv;
+    flat vec2 bound_uv;
 #endif
 
 #ifdef WIREFRAME
@@ -115,12 +117,14 @@ void main()
 
 #if defined(NORMAL_MAPPING) || defined(WATER)
     tangent = normalize(at_tangent.xyz * at_tangent.w);
-    bitangent = normalize(cross(tangent, world_normal));
+    bitangent = cross(tangent, world_normal);
 #endif
 
 #ifdef POM
 	mat3 TBN = mat3(tangent, bitangent, world_normal);
 	tangentpos = normalize(world_position.xyz * TBN);
+    miduv = mc_midTexCoord.st;
+    bound_uv = gl_MultiTexCoord0.st;
 #endif
 
     vertex_color = gl_Color;
