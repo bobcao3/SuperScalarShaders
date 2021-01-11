@@ -288,6 +288,7 @@ void main()
 #endif
 
     vec3 sample_pos_smooth = world_position.xyz + normal * 0.51 + mod(cameraPosition, 1.0);
+    // sample_pos_smooth.y += 0.5;
 
 #ifdef WATER
     ivec3 ioffset = ivec3(0);
@@ -327,7 +328,12 @@ void main()
 
     vec3 image_based_lighting = vec3(0.0);
 
+#if MC_VERSION > 13000
     vec3 world_dir = normalize(world_position.xyz);
+#else
+    vec3 world_dir = normalize(world_position.xyz - vec3(0.0, 1.61, 0.0));
+#endif
+
     vec3 reflection_dir = reflect(world_dir, normal);
 
     vec4 color = texture(tex, uv) * vertex_color;

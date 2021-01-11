@@ -19,7 +19,8 @@ void main()
 
     if (block_id > 199) emmisive = 0.9;
 
-    vec3 color = texture(tex, uv, 3).rgb * vertex_color.rgb;
+    vec4 texcolor = texture(tex, uv, 3);
+    vec3 color = texcolor.a == 0.0 ? vec3(1.0) : texcolor.rgb * vertex_color.rgb;
 
     if (block_id == 30)
         color = color * 0.4 + 0.6;

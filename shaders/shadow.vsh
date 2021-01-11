@@ -23,6 +23,10 @@ void main()
     vec4 world_pos = shadowModelViewInverse * view_pos;
     // vec4 proj_pos = gl_ProjectionMatrix * view_pos;
 
+#if MC_VERSION < 13000
+    // world_pos.y -= 1.61;
+#endif
+
     vec3 world_normal = gl_Normal.xyz;
     uv = mc_midTexCoord; //mat2(gl_TextureMatrix[0]) * gl_MultiTexCoord0.st;
 

@@ -19,7 +19,6 @@ const float sunPathRotation = -43.0f;
 
 */
 
-
 #include "/libs/compat.glsl"
 
 const bool colortex2Clear = false;

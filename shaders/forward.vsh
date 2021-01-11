@@ -96,6 +96,7 @@ void main()
 
     vec4 view_pos = gl_ModelViewMatrix * vertex;
     vec4 proj_pos = gl_ProjectionMatrix * view_pos;
+
     world_position = gbufferModelViewInverse * view_pos;
 
 #ifdef WATER
@@ -130,6 +131,8 @@ void main()
     {
         lmcoord.y = 1.0;
     }
+
+    if (mc_Entity.x > 199) lmcoord.x = 1.0;
 
     gl_Position = proj_pos;
 
