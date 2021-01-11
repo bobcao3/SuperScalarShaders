@@ -311,10 +311,10 @@ vec4 scatter(vec3 o, vec3 d, vec3 Ds, float lmax, float nseed) {
 
 #ifdef DISABLE_MIE
 	vec3 color = I * (max(vec3(0.0), R) * bR * phaseR);
-	color += (0.1 * I) * (max(vec3(0.0), R_moon) * bR * phaseR_moon);
+	color += (0.01 * I) * (max(vec3(0.0), R_moon) * bR * phaseR_moon);
 #else
 	vec3 color = I * (max(vec3(0.0), R) * bR * phaseR + max(vec3(0.0), M) * bM * phaseM + max(vec3(0.0), Mc) * bMc);
-	color += (0.1 * I) * (max(vec3(0.0), R_moon) * bR * phaseR_moon + max(vec3(0.0), M_moon) * bM * phaseM_moon + max(vec3(0.0), Mc_moon) * bMc);
+	color += (0.01 * I) * (max(vec3(0.0), R_moon) * bR * phaseR_moon + max(vec3(0.0), M_moon) * bM * phaseM_moon + max(vec3(0.0), Mc_moon) * bMc);
 #endif
 
 	float transmittance = exp(-(bM.x * depth.y));

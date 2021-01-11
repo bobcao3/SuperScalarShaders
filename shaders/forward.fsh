@@ -41,8 +41,6 @@ uniform sampler2D gaux1;
 // uniform vec3 cameraPosition;
 // uniform vec3 previousCameraPosition;
 
-uniform vec3 fogColor;
-
 #ifdef POM
 
 vec2 ParallaxMapping(in vec2 coord) {
@@ -301,7 +299,7 @@ void main()
 
     vec3 image_based_lighting = vec3(0.0);
 
-#if MC_VERSION > 13000
+#if MC_VERSION > 11300
     vec3 world_dir = normalize(world_position.xyz);
 #else
     vec3 world_dir = normalize(world_position.xyz - vec3(0.0, 1.61, 0.0));
@@ -383,7 +381,7 @@ void main()
                     ivec3 volume_pos_prev = getVolumePos(sample_pos - sample_dir * 0.5, cameraPosition) + ioffset;
                     ivec2 planar_pos_prev = volume2planar(volume_pos_prev);
 
-                    hitcolor *= max(fogColor * pow(lmcoord.y, 2.0) * 0.3, texelFetch(gaux2, planar_pos_prev, 0).rgb);
+                    hitcolor *= max(skyColor * pow(lmcoord.y, 2.0) * 0.3, texelFetch(gaux2, planar_pos_prev, 0).rgb);
                     break;
                 }
             }

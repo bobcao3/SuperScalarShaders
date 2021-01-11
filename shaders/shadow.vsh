@@ -23,7 +23,7 @@ void main()
     vec4 world_pos = shadowModelViewInverse * view_pos;
     // vec4 proj_pos = gl_ProjectionMatrix * view_pos;
 
-#if MC_VERSION < 13000
+#if MC_VERSION < 113000
     // world_pos.y -= 1.61;
 #endif
 
