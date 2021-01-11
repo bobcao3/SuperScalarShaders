@@ -444,7 +444,7 @@ void main()
     lighting /= color.a;
     #endif
 
-    if (block_id < 200)
+    if (block_id < 9200)
     {
         color.rgb *= lighting;
     }

@@ -4,7 +4,7 @@
 
 /*
 
-const float shadowDistance = 64.0f;
+const float shadowDistance = 70.0f;
 const float shadowDistanceRenderMul = 1.0f;
 const float shadowIntervalSize = 1.0f;
 

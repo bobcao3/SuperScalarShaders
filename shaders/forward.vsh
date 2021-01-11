@@ -132,7 +132,7 @@ void main()
         lmcoord.y = 1.0;
     }
 
-    if (mc_Entity.x > 199) lmcoord.x = 1.0;
+    if (mc_Entity.x > 9199) lmcoord.x = 1.0;
 
     gl_Position = proj_pos;
 
