@@ -318,7 +318,7 @@ void main()
 
     vec4 materials = texture(specular, uv);
 
-    float roughness = pow(1.0 - materials.r, 2.0);
+    float roughness = 1.0 - materials.r;
 
     #ifdef WATER
     roughness = 0.01;
@@ -336,6 +336,8 @@ void main()
     float rand1d = hash1d * 65536.0;// + float(frameCounter & 0xFF);
 
     vec3 F = getF(materials.g, roughness, NdotV);
+
+    lighting *= F;
 
     for (int i = 0; i < LIGHTING_SAMPLES; i++)
     {
@@ -372,16 +374,18 @@ void main()
                 vec4 voxel_color = texelFetch(shadowcolor0, planar_pos, 0);
                 float voxel_attribute = texelFetch(shadowtex0, planar_pos, 0).r;
 
-                hitcolor *= voxel_color.rgb;
+                hitcolor *= pow(voxel_color.rgb, vec3(2.2));
 
-                if (voxel_color.a < 1.0 || (voxel_attribute > 0.54 && voxel_attribute < 0.56))
+                bool is_lightsource = (voxel_attribute > 0.54 && voxel_attribute < 0.56);
+
+                if (voxel_color.a < 1.0 || is_lightsource)
                 {
                     hit = true;
                     
                     ivec3 volume_pos_prev = getVolumePos(sample_pos - sample_dir * 0.5, cameraPosition) + ioffset;
                     ivec2 planar_pos_prev = volume2planar(volume_pos_prev);
 
-                    hitcolor *= max(skyColor * pow(lmcoord.y, 2.0) * 0.3, texelFetch(gaux2, planar_pos_prev, 0).rgb);
+                    if (!is_lightsource) hitcolor *= max(skyColor * pow(lmcoord.y, 2.0) * 0.7, texelFetch(gaux2, planar_pos_prev, 0).rgb);
                     break;
                 }
             }
