@@ -347,7 +347,7 @@ void main()
 
     vec4 materials = texture(specular, uv);
 
-    float roughness = 1.0 - materials.r;
+    float roughness = pow(1.0 - materials.r, 2.0);
 
     #ifdef WATER
     roughness = 0.01;
