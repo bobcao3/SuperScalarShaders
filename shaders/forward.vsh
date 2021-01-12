@@ -140,6 +140,10 @@ void main()
 
     gl_Position = proj_pos;
 
+#ifdef SPECTRAL
+    gl_Position.z = gl_Position.z * 0.002;
+#endif
+
 #ifndef NO_TAA
     gl_Position.st += JitterSampleOffset(frameCounter) * invWidthHeight * gl_Position.w;
 #endif

@@ -23,6 +23,10 @@ in VertexOut {
 #endif
 };
 
+#ifdef ENTITY
+uniform vec4 entityColor;
+#endif
+
 #ifdef NORMAL_MAPPING
 uniform sampler2D normals;
 #endif
@@ -339,7 +343,11 @@ void main()
 
     lighting *= F;
 
+    #ifdef WATER
+    for (int i = 0; i < 1; i++)    
+    #else
     for (int i = 0; i < LIGHTING_SAMPLES; i++)
+    #endif
     {
         vec2 rand2d = WeylNth(int(rand1d) * LIGHTING_SAMPLES + i);
 
@@ -357,9 +365,15 @@ void main()
         bool hit = false;
         vec3 hitcolor = vec3(1.0);
 
+        vec3 skybox_color = texture(gaux3, skybox_uv, 3).rgb;
+
         if ((fade_distance < 1.0) && (dot(sample_dir, vertex_normal) > 0.0))
         {
+            #ifdef WATER
+            for (int j = 0; j < RAYTRACE_DISTANCE * 4; j++)
+            #else
             for (int j = 0; j < RAYTRACE_DISTANCE; j++)
+            #endif
             {
                 #ifdef WATER
                 vec3 sample_pos = world_position.xyz + vertex_normal * 0.5 + sample_dir * (float(j) + hash1d);
@@ -385,7 +399,7 @@ void main()
                     ivec3 volume_pos_prev = getVolumePos(sample_pos - sample_dir * 0.5, cameraPosition) + ioffset;
                     ivec2 planar_pos_prev = volume2planar(volume_pos_prev);
 
-                    if (!is_lightsource) hitcolor *= max(skyColor * pow(lmcoord.y, 2.0) * 0.7, texelFetch(gaux2, planar_pos_prev, 0).rgb);
+                    if (!is_lightsource) hitcolor *= max(skybox_color * pow(lmcoord.y, 2.0) * 0.7, texelFetch(gaux2, planar_pos_prev, 0).rgb);
                     break;
                 }
             }
@@ -393,7 +407,7 @@ void main()
             hitcolor *= vertex_color.a;
         }
 
-        vec3 approxSkylight = pow(lmcoord.y, 2.0) * texture(gaux3, skybox_uv, 3).rgb;
+        vec3 approxSkylight = pow(lmcoord.y, 2.0) * skybox_color;
 
         #ifndef WATER
         if (dot(sample_dir, vertex_normal) <= 0.0)
@@ -416,7 +430,7 @@ void main()
     lighting += image_based_lighting * F;
 
     #ifdef WATER
-    // lighting /= color.a;
+    lighting /= color.a;
     #endif
 
     if (block_id < 9200)
@@ -436,6 +450,10 @@ void main()
     #endif
 
     color.rgb += lighting_additive;
+
+#ifdef SPECTRAL
+    color.rgb = mix(vec3(0.7), color.rgb, 1.0 - min(1.0, length(world_position) / 16.0));
+#endif
 
 #ifdef WIREFRAME
     float outlineWidth = 0.05;
@@ -461,6 +479,10 @@ void main()
     color.rgb = toGamma(color.rgb);
 
     // color.rgb = lighting;
+
+#ifdef ENTITY
+    color.rgb += entityColor.rgb;
+#endif
 
     gl_FragData[0] = color;
 }

@@ -20,7 +20,7 @@ void main()
     if (block_id > 9199) emmisive = 0.9;
 
     vec4 texcolor = texture(tex, uv, 3);
-    vec3 color = mix(vec3(1.0), texcolor.rgb * vertex_color.rgb, texcolor.a);
+    vec3 color = mix(vec3(0.5), texcolor.rgb * vertex_color.rgb, texcolor.a);
 
     // if (transparency == 1.0) color.rgb = color.rgb * 0.8 + 0.2;
 
