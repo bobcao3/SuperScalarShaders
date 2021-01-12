@@ -38,6 +38,8 @@ void main()
         color = vec3(254.0, 227.0, 255.0) / 255.0;
     else if (lmcoord.x > 0.9685)
         emmisive = 0.9;
+    else if (block_id == 32)
+        color = vec3(1.0);
 
     gl_FragColor = vec4(color, transparency);
 }

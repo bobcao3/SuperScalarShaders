@@ -70,20 +70,21 @@ void main() {
 
     float view_distance = length(view_pos);
 
-    if (depth <= 0.999999f && biomeCategory != 16)
+    vec3 world_sun_dir = mat3(gbufferModelViewInverse) * (sunPosition * 0.01);
+
+    if (isEyeInWater == 1)
+    {
+        vec3 ambient = texture(gaux3, project_skybox2uv(world_sun_dir), 3).rgb;
+        ambient = ambient * 0.5 + dot(ambient, vec3(0.333)) * 0.5;
+        current = mix(current, vec3(0.1, 0.6, 1.0) * ambient * 0.1, smoothstep(view_distance, 0.0, 32.0));
+    }
+    else if (depth <= 0.999999f && biomeCategory != 16)
     {
         current = pow(current, vec3(2.2));
-
-        vec3 world_sun_dir = mat3(gbufferModelViewInverse) * (sunPosition * 0.01);
 
         vec4 fog = scatter(vec3(0.0, cameraPosition.y, 0.0), normalize(world_pos), world_sun_dir, view_distance * 50.0, 0.1);
         current = mix(fog.rgb, current, fog.a);
         current = pow(current, vec3(1.0 / 2.2));
-    }
-
-    if (isEyeInWater == 1)
-    {
-        current = mix(current, vec3(0.1, 0.6, 1.0) * dot(current, vec3(0.3)), smoothstep(view_distance, 0.0, 32.0));
     }
 
     if (isnan(current.r) || isnan(current.g) || isnan(current.b)) current = vec3(0.0);

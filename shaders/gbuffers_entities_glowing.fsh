@@ -4,7 +4,6 @@
 #define ENTITY
 #define UNLIT
 #define SPECTRAL
-#define WIREFRAME
 
 #include "/libs/compat.glsl"
 #include "forward.fsh"

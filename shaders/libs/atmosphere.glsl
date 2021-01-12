@@ -244,9 +244,6 @@ vec4 scatter(vec3 o, vec3 d, vec3 Ds, float lmax, float nseed) {
 	
 	float L = min(lmax, escape(o, d, Ra));
 
-	float cloudMaxL = 0.0;//min(lmax, escape(o, d, R0 + cloudAltitude + cloudDepth));
-	float cloudMinL = 0.0;//min(lmax, escape(o, d, R0 + cloudAltitude - cloudDepth));
-
 	float phaseM, phaseR;
 	float phaseM_moon, phaseR_moon;
 
@@ -270,32 +267,12 @@ vec4 scatter(vec3 o, vec3 d, vec3 Ds, float lmax, float nseed) {
 	vec3 R = vec3(0.0), M = vec3(0.0), Mc = vec3(0.0);
 	vec3 R_moon = vec3(0.0), M_moon = vec3(0.0), Mc_moon = vec3(0.0);
 
-	// for (int i = 0; i < CLOUD_STEPS; ++i) {
-	// 	float dl, l;
-
-	// 	dl = (cloudMaxL - cloudMinL) / float(CLOUD_STEPS);
-	// 	l = cloudMinL + dl * float(i + nseed * 2.0 - 1.0);
-
-	// 	vec3 p = o + d * l;
-
-	// 	vec2 des;
-	// 	densities(p, des);
-	// 	des.y += densitiesCloud(p);
-
-	// 	des *= vec2(dl);
-	// 	depth += des;
-
-	// 	vec3 Ri, Mi, Mci;
-	// 	inScatter(p, Ds, Ra, depth, des, nseed, Ri, Mi); R += Ri; M += Mi;
-	// 	inScatter(p, -Ds, Ra, depth, des, nseed, Ri, Mi); R_moon += Ri; M_moon += Mi;
-	// }
-
-	float u0 = - (L - cloudMaxL - 1.0) / (1.0 - exp2(steps));
+	float u0 = - (L - 1.0) / (1.0 - exp2(steps));
 	for (int i = 0; i < steps; ++i) {
 		float dl, l;
 
 		dl = u0 * exp2(i + nseed);
-		l = cloudMaxL - u0 * (1.0 - exp2(i + nseed + 1));
+		l = -u0 * (1.0 - exp2(i + nseed + 1));
 
 		vec3 p = o + d * l;
 
@@ -313,8 +290,8 @@ vec4 scatter(vec3 o, vec3 d, vec3 Ds, float lmax, float nseed) {
 	vec3 color = I * (max(vec3(0.0), R) * bR * phaseR);
 	color += (0.01 * I) * (max(vec3(0.0), R_moon) * bR * phaseR_moon);
 #else
-	vec3 color = I * (max(vec3(0.0), R) * bR * phaseR + max(vec3(0.0), M) * bM * phaseM + max(vec3(0.0), Mc) * bMc);
-	color += (0.01 * I) * (max(vec3(0.0), R_moon) * bR * phaseR_moon + max(vec3(0.0), M_moon) * bM * phaseM_moon + max(vec3(0.0), Mc_moon) * bMc);
+	vec3 color = I * (max(vec3(0.0), R) * bR * phaseR + max(vec3(0.0), M) * bM * phaseM);
+	color += (0.01 * I) * (max(vec3(0.0), R_moon) * bR * phaseR_moon + max(vec3(0.0), M_moon) * bM * phaseM_moon);
 #endif
 
 	float transmittance = exp(-(bM.x * depth.y));

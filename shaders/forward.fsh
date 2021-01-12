@@ -180,7 +180,7 @@ mat3 make_coord_space(vec3 n) {
 
 vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness)
 {
-    float a = roughness*roughness;
+    float a = roughness;
 	
     float phi = 2.0 * PI * Xi.x;
     float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a*a - 1.0) * Xi.y));
@@ -249,6 +249,14 @@ void main()
     #define uv adj_uv
 #endif
 
+    vec4 color = texture(tex, uv) * vertex_color;
+    
+    if (color.a < 0.1)
+    {
+        gl_FragData[0] = vec4(0.0);
+        return;
+    }
+
 #ifdef NORMAL_MAPPING
     vec3 normal_map;
     normal_map.xy = texture(normals, uv).rg * 2.0 - 1.0;
@@ -275,7 +283,6 @@ void main()
     float fade_distance = max(max(fade_distances.x, fade_distances.y), fade_distances.z);
 
     vec3 lighting = vec3(0.0);
-    vec3 lighting_additive = vec3(0.0);
  
 #ifdef UNLIT
     lighting = vec3(1.0);
@@ -311,8 +318,6 @@ void main()
 
     vec3 reflection_dir = reflect(world_dir, normal);
 
-    vec4 color = texture(tex, uv) * vertex_color;
-
     color.rgb = fromGamma(color.rgb);
 
     vec3 world_sun_dir = mat3(gbufferModelViewInverse) * sunPosition * 0.01;
@@ -325,11 +330,11 @@ void main()
     float roughness = 1.0 - materials.r;
 
     #ifdef WATER
-    roughness = 0.01;
-    materials.g = 0.89;
-    
-    if (block_id == 32)
+    if (block_id == 32 || materials.r < 0.01)
     {
+        roughness = 0.02;
+        materials.g = 0.89;
+    
         color.rgb = vertex_color.rgb * 0.5 + 0.5;
     }
     #endif
@@ -354,9 +359,14 @@ void main()
         vec3 H = ImportanceSampleGGX(rand2d, normal, roughness);
         vec3 sample_dir = normalize(2.0 * dot(-world_dir, H) * H + world_dir);
 
+        if (dot(sample_dir, vertex_normal) <= 0.0)
+        {
+            sample_dir = reflect(sample_dir, vertex_normal);
+        }
+
         vec2 skybox_uv = project_skybox2uv(sample_dir);
         
-        if (roughness > 0.5)
+        if (roughness > 0.3)
         {
             skybox_uv.x += 0.25 + 8.0 * invWidthHeight.x;
         }
@@ -410,11 +420,11 @@ void main()
         vec3 approxSkylight = pow(lmcoord.y, 2.0) * skybox_color;
 
         #ifndef WATER
-        if (dot(sample_dir, vertex_normal) <= 0.0)
-        {
-            hit = true;
-            hitcolor = approxSkylight;
-        }
+        // if (dot(sample_dir, vertex_normal) <= 0.0)
+        // {
+        //     hit = true;
+        //     hitcolor = approxSkylight;
+        // }
         #endif
 
         if (!hit) {
@@ -427,10 +437,10 @@ void main()
         #endif
     }
 
-    lighting += image_based_lighting * F;
-
     #ifdef WATER
-    lighting /= color.a;
+    lighting += image_based_lighting;
+    #else
+    lighting += image_based_lighting * F;
     #endif
 
     if (block_id < 9200)
@@ -445,11 +455,13 @@ void main()
     #ifdef WATER
     if (block_id == 32)
     {
-        color.a = F.g * 0.7 + 0.3;
+        color.a = clamp(F.g * 1.7 + 0.3, 0.0, 1.0);
     }
     #endif
 
-    color.rgb += lighting_additive;
+    #ifdef WATER
+    lighting /= color.a;
+    #endif
 
 #ifdef SPECTRAL
     color.rgb = mix(vec3(0.7), color.rgb, 1.0 - min(1.0, length(world_position) / 16.0));
