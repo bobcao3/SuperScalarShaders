@@ -37,6 +37,6 @@ void main()
 
         gl_FragData[0] = skybox;
     } else {
-        discard;
+        gl_FragData[0] = texelFetch(gaux3, iuv, 0);
     }
 }

@@ -319,7 +319,7 @@ vec4 scatter(vec3 o, vec3 d, vec3 Ds, float lmax, float nseed) {
 
 	float transmittance = exp(-(bM.x * depth.y));
 
-	return max(vec4(0.0), vec4(color, transmittance));
+	return max(vec4(0.0), vec4(color * 4.0, transmittance));
 }
 
 // vec4 scatterClouds(vec3 o, vec3 d, vec3 Ds, float lmax, float nseed) {

@@ -4,7 +4,7 @@
 
 #include "libs/compat.glsl"
 
-/* DRAWBUFFERS: 4 */
+/* DRAWBUFFERS: 04 */
 
 uniform sampler2D shadowcolor0;
 uniform sampler2D shadowtex0;
@@ -18,10 +18,28 @@ uniform sampler2D gaux1;
 // uniform vec3 cameraPosition;
 
 #include "/libs/atmosphere.glsl"
+#include "/libs/transform.glsl"
 
 void main()
 {
     ivec2 iuv = ivec2(gl_FragCoord.st);
+
+    float depth = texelFetch(depthtex0, iuv, 0).r;
+
+    vec4 proj_pos = vec4(vec2(iuv) * invWidthHeight * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+    vec4 view_pos = gbufferProjectionInverse * proj_pos;
+    view_pos.xyz /= view_pos.w;
+    vec3 world_dir = mat3(gbufferModelViewInverse) * normalize(view_pos.xyz);
+
+    vec3 color = pow(texelFetch(colortex0, iuv, 0).rgb, vec3(2.2));
+
+    if (depth >= 1.0)
+    {
+        color *= 3.0;
+        color += texture(gaux3, project_skybox2uv(world_dir)).rgb;
+    }
+
+    gl_FragData[0] = vec4(pow(color, vec3(1.0 / 2.2)), 1.0);
 
     if (iuv.x < volume_width * volume_depth_grid_width && iuv.y < volume_height * volume_depth_grid_height)
     {
@@ -58,6 +76,6 @@ void main()
             }
         }
 
-        gl_FragData[0] = voxel_color;
+        gl_FragData[1] = voxel_color;
     }
 }

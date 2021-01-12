@@ -22,12 +22,14 @@ const float sunPathRotation = -43.0f;
 #include "/libs/compat.glsl"
 
 const bool colortex2Clear = false;
+const bool gaux3Clear = false;
 
 #define VECTORS
 #define TRANSFORMATIONS_RESIDUAL
 
 #include "/libs/transform.glsl"
 #include "/libs/noise.glsl"
+#include "/libs/atmosphere.glsl"
 
 // #define TAA_NO_CLIP
 
@@ -55,13 +57,26 @@ void main() {
 
     float depth = getDepth(iuv);
     vec3 proj_pos = getProjPos(iuv, depth);
-    vec3 world_pos = view2world(proj2view(proj_pos));
+    vec3 view_pos = proj2view(proj_pos);
+    vec3 world_pos = view2world(view_pos);
 
     vec4 world_pos_prev = vec4(world_pos - previousCameraPosition + cameraPosition, 1.0);
     vec4 proj_pos_prev = gbufferPreviousProjection * (gbufferPreviousModelView * world_pos_prev);
     proj_pos_prev.xy /= proj_pos_prev.w;
 
     vec3 current = texelFetch(colortex0, iuv, 0).rgb;
+
+    if (depth <= 0.999999f && biomeCategory != 16)
+    {
+        current = pow(current, vec3(2.2));
+        float view_distance = length(view_pos);
+
+        vec3 world_sun_dir = mat3(gbufferModelViewInverse) * (sunPosition * 0.01);
+
+        vec4 fog = scatter(vec3(0.0, cameraPosition.y, 0.0), normalize(world_pos), world_sun_dir, view_distance * 50.0, 0.1);
+        current = mix(fog.rgb, current, fog.a);
+        current = pow(current, vec3(1.0 / 2.2));
+    }
 
     if (isnan(current.r) || isnan(current.g) || isnan(current.b)) current = vec3(0.0);
 
@@ -91,8 +106,8 @@ void main() {
         }
     }
     
-    vec3 min_neighbor0 = vec3(1000.0);
-    vec3 max_neighbor0 = vec3(0.0);
+    vec3 min_neighbor0 = current;
+    vec3 max_neighbor0 = current;
 
     for (int i = -1; i <= 1; i++)
     {
@@ -103,9 +118,6 @@ void main() {
             max_neighbor0 = max(max_neighbor0, s);
         }
     }
-
-    min_neighbor0 = min(min_neighbor0, current);
-    max_neighbor0 = max(max_neighbor0, current);
 
     vec2 prev_uv = (proj_pos_prev.xy * 0.5 + 0.5);
     vec2 prev_uv_texels = prev_uv * vec2(viewWidth, viewHeight);

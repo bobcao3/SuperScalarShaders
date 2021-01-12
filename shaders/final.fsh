@@ -3,6 +3,7 @@
 /* DRAWBUFFERS: 02 */
 
 const bool colortex2Clear = false;
+const bool gaux3Clear = false;
 
 uniform sampler2D colortex2;
 uniform sampler2D gaux1;
@@ -26,7 +27,7 @@ void main()
 
     color = ACESFitted(color) * 1.1;
 
-    // if (iuv.x < 1024 && iuv.y < 1024) color = texelFetch(shadowcolor0, iuv, 0).rgb;
+    // if (iuv.x < 1024 && iuv.y < 1024) color = texelFetch(gaux3, iuv, 0).rgb;
 
     gl_FragColor = vec4(color, 1.0);
 }

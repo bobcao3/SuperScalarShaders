@@ -393,13 +393,13 @@ void main()
             hitcolor *= vertex_color.a;
         }
 
-        vec3 approxSkylight = pow(lmcoord.y, 2.0) * texture(gaux3, skybox_uv, 3).rgb * 3.0;
+        vec3 approxSkylight = pow(lmcoord.y, 2.0) * texture(gaux3, skybox_uv, 3).rgb;
 
         #ifndef WATER
         if (dot(sample_dir, vertex_normal) <= 0.0)
         {
             hit = true;
-            hitcolor = approxSkylight * color.rgb * roughness;
+            hitcolor = approxSkylight;
         }
         #endif
 
@@ -409,14 +409,14 @@ void main()
             image_based_lighting += hitcolor;
         }
         #else
-        image_based_lighting += pow(lmcoord.y, 3.0) * texture(gaux3, skybox_uv, 3).rgb * vertex_color.a * 3.0;
+        image_based_lighting += pow(lmcoord.y, 3.0) * texture(gaux3, skybox_uv, 3).rgb * vertex_color.a;
         #endif
     }
 
     lighting += image_based_lighting * F;
 
     #ifdef WATER
-    lighting /= color.a;
+    // lighting /= color.a;
     #endif
 
     if (block_id < 9200)
