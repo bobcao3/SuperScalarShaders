@@ -35,7 +35,7 @@ void main()
 
     if (depth >= 1.0)
     {
-        color *= 3.0;
+        color *= 3.0 * smoothstep(max(0.0, world_dir.y), 0.0, 0.03);
         color += texture(gaux3, project_skybox2uv(world_dir)).rgb;
     }
 
@@ -46,17 +46,17 @@ void main()
         vec4 voxel_color = texelFetch(shadowcolor0, iuv, 0).rgba;
         float voxel_attribute = texelFetch(shadowtex0, iuv, 0).r;
 
+        ivec3 volume_pos = planar2volume(iuv);
+        ivec3 prev_volume_pos = volume_pos + ivec3(floor(cameraPosition) - floor(previousCameraPosition));
+        ivec2 prev_planar_pos = volume2planar(prev_volume_pos);
+
+        vec4 prev_color = texelFetch(gaux1, prev_planar_pos, 0);
+        float prev_solid = prev_color.a;
+
         if (voxel_color.a > 0.9 && (voxel_attribute < 0.54 || voxel_attribute > 0.56))
         {
             voxel_color = vec4(0.0);
 
-            ivec3 volume_pos = planar2volume(iuv);
-            ivec3 prev_volume_pos = volume_pos + ivec3(floor(cameraPosition) - floor(previousCameraPosition));
-            ivec2 prev_planar_pos = volume2planar(prev_volume_pos);
-
-            vec4 prev_color = texelFetch(gaux1, prev_planar_pos, 0);
-            float prev_solid = prev_color.a;
-            
             if (prev_planar_pos != ivec2(-1))
             {
                 voxel_color.rgb = prev_color.rgb * 0.95;
@@ -68,7 +68,7 @@ void main()
 
             if (voxel_attribute > 0.54 && voxel_attribute < 0.56)
             {
-                voxel_color.rgb = pow(voxel_color.rgb, vec3(2.2)) * 10.0;
+                voxel_color.rgb = mix(prev_color.rgb, pow(voxel_color.rgb, vec3(2.2)) * 10.0, 0.2);
             }
             else
             {

@@ -330,7 +330,7 @@ void main()
     float roughness = 1.0 - materials.r;
 
     #ifdef WATER
-    if (block_id == 32 || materials.r < 0.01)
+    if (block_id == 32)
     {
         roughness = 0.02;
         materials.g = 0.89;

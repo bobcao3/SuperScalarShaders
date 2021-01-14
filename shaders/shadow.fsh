@@ -22,7 +22,7 @@ void main()
     vec4 texcolor = texture(tex, uv, 3);
     vec3 color = mix(vec3(0.5), texcolor.rgb * vertex_color.rgb, texcolor.a);
 
-    // if (transparency == 1.0) color.rgb = color.rgb * 0.8 + 0.2;
+    if (transparency == 1.0) color.rgb = color.rgb * 0.5 + 0.5;
 
     if (block_id == 30)
         color = color * 0.4 + 0.6;

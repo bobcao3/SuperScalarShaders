@@ -30,7 +30,7 @@ void main()
             vec3 dir = project_uv2skybox(vec2(iuv) * invWidthHeight);
             vec3 world_sun_dir = mat3(gbufferModelViewInverse) * (sunPosition * 0.01);
 
-            skybox = scatter(vec3(0.0, cameraPosition.y, 0.0), dir, world_sun_dir, Ra, 0.1);
+            skybox = scatter(vec3(0.0, cameraPosition.y, 0.0), dir, world_sun_dir, Ra, 0.1) * 2.0;
         } else {
             skybox = vec4(fromGamma(fogColor), 0.0);
         }
