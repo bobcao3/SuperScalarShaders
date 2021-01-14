@@ -3,9 +3,9 @@
 
 #include "/libs/compat.glsl"
 
-const bool colortex1Clear = false;
 const bool colortex2Clear = false;
 const bool gaux3Clear = false;
+const bool gaux4Clear = false;
 
 #define VECTORS
 #define TRANSFORMATIONS_RESIDUAL
@@ -79,15 +79,23 @@ void main() {
 
     if (isnan(current.r) || isnan(current.g) || isnan(current.b)) current = vec3(0.0);
 
-    // VL
-#ifdef VOLUMETRIC_LIGHTING
+    vec2 prev_uv = (proj_pos_prev.xy * 0.5 + 0.5);
+    vec2 prev_uv_texels = prev_uv * vec2(viewWidth, viewHeight);
+    vec2 iprev_uv = floor(prev_uv_texels);
+    prev_uv += 0.5 * invWidthHeight;
+
     vec3 vl = vec3(0.0);
+
+#ifdef VOLUMETRIC_LIGHTING
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
-            vl += texelFetch(colortex1, iuv / 2 + ivec2(i, j), 0).rgb;
+            vl += texelFetch(colortex3, iuv / 2 + ivec2(i, j), 0).rgb;
         }        
     }
-    current += vl * (0.002);
+
+    vl *= 0.002;
+
+    current += vl;
 #endif
 
     vec3 min_neighbor0 = current;
@@ -103,12 +111,6 @@ void main() {
         }
     }
 
-    vec2 prev_uv = (proj_pos_prev.xy * 0.5 + 0.5);
-    vec2 prev_uv_texels = prev_uv * vec2(viewWidth, viewHeight);
-    vec2 iprev_uv = floor(prev_uv_texels);
-    prev_uv += 0.5 * invWidthHeight;
-
-
     vec3 s00 = sampleHistory(ivec2(iprev_uv), min_neighbor0, max_neighbor0);
     vec3 s01 = sampleHistory(ivec2(iprev_uv) + ivec2(0, 1), min_neighbor0, max_neighbor0);
     vec3 s10 = sampleHistory(ivec2(iprev_uv) + ivec2(1, 0), min_neighbor0, max_neighbor0);
@@ -122,7 +124,7 @@ void main() {
 
     if (prev_uv.x < 0.0 || prev_uv.x > 1.0 || prev_uv.y < 0.0 || prev_uv.y > 1.0) history = current.rgb;
 
-    vec3 color = mix(history, current.rgb, 0.1);
+    vec3 color = mix(history, current.rgb, 0.2);
 
     if (depth <= 0.7) {
         color = current.rgb;

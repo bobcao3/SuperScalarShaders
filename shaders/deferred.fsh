@@ -68,7 +68,7 @@ void main()
 
             if (voxel_attribute > 0.54 && voxel_attribute < 0.56)
             {
-                voxel_color.rgb = mix(prev_color.rgb, pow(voxel_color.rgb, vec3(2.2)) * 10.0, 0.2);
+                voxel_color.rgb = mix(prev_color.rgb, pow(voxel_color.rgb, vec3(2.2)) * 20.0, 0.2);
             }
             else
             {

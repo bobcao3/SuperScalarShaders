@@ -22,6 +22,16 @@ ivec2 volume2planar(ivec3 pos)
     return uv;
 }
 
+vec2 volume2planarUV(vec3 pos)
+{
+    if (pos.x < 0 || pos.x >= volume_width || pos.y < 0 || pos.y >= volume_depth || pos.z < 0 || pos.z >= volume_height) return ivec2(-1);
+
+    ivec2 base = ivec2((int(pos.y) % volume_depth_grid_width) * volume_width, (int(pos.y) / volume_depth_grid_width) * volume_height);
+    vec2 uv = vec2(base) + pos.xz;
+
+    return uv;
+}
+
 ivec3 planar2volume(ivec2 uv)
 {
     ivec2 y_grid = uv / ivec2(volume_width, volume_height);
