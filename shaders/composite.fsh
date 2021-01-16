@@ -91,7 +91,7 @@ void main() {
 
         vec3 voxel_sample = mix(voxel_sample0, voxel_sample1, fract(spos.y));
 
-        color += voxel_sample * step_length * exp(-L * 0.07);
+        color += voxel_sample * step_length * exp(-L * 0.02);
     }
 
 /* DRAWBUFFERS:3 */

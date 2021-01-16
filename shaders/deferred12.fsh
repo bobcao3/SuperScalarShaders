@@ -24,7 +24,7 @@ uniform int frameCounter;
 void main()
 {
     ivec2 iuv = ivec2(gl_FragCoord.st);
-
+    
     if (frameCounter % 5 != 0) {
         discard;
     }

@@ -37,7 +37,7 @@ uniform int biomeCategory;
 
 uniform vec2 invWidthHeight;
 uniform int frameCounter;
-uniform float rainStrength;
+uniform float rainStrength2;
 uniform float frameTimeCounter;
 
 #include "/libs/noise.glsl"
@@ -63,20 +63,20 @@ void main()
     #if defined(WAVING_FOILAGE)
     if (block_id == 30 || block_id == 29)
     {
-        float maxStrength = 0.5 + rainStrength;
+        float maxStrength = 0.5 + rainStrength2;
         float time = frameTimeCounter * 3.0;
 
         if (block_id == 30) {
             if (gl_MultiTexCoord0.t < mc_midTexCoord.t) {
                 float rand_ang = hash(vertex.xz);
                 float reset = cos(rand_ang * 10.0 + time * 0.1);
-                reset = max( reset * reset, max(rainStrength * 0.5, 0.1));
+                reset = max( reset * reset, max(rainStrength2 * 0.5, 0.1));
                 vertex.x += (sin(rand_ang * 10.0 + time + vertex.y) * 0.2) * (reset * maxStrength);
             }
         } else if (block_id == 29) {
             float rand_ang = hash(vertex.xz);
             float reset = cos(rand_ang * 10.0 + time * 0.1);
-            reset = max( reset * reset, max(rainStrength * 0.5, 0.1));
+            reset = max( reset * reset, max(rainStrength2 * 0.5, 0.1));
             vertex.x += (sin(rand_ang * 5.0 + time + vertex.x) * 0.035 + 0.035) * (reset * maxStrength);
             vertex.y += (cos(rand_ang * 5.0 + time + vertex.y) * 0.01 + 0.01) * (reset * maxStrength);
             vertex.z += (sin(rand_ang * 5.0 + time + vertex.z) * 0.035 + 0.035) * (reset * maxStrength);
@@ -124,7 +124,7 @@ void main()
 	mat3 TBN = mat3(tangent, bitangent, world_normal);
 	tangentpos = normalize(world_position.xyz * TBN);
     miduv = mc_midTexCoord.st;
-    bound_uv = gl_MultiTexCoord0.st;
+    bound_uv = uv;
 #endif
 
     vertex_color = gl_Color;
@@ -136,7 +136,7 @@ void main()
         lmcoord.y = 1.0;
     }
 
-    if (mc_Entity.x > 9199) lmcoord.x = 1.0;
+    if (mc_Entity.x > 9199) lmcoord.x = 0.95;
 
     gl_Position = proj_pos;
 

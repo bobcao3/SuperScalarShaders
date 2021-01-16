@@ -295,7 +295,7 @@ void main()
         float handLightLevel_f = float(handLightLevel) * (1.0 / 240.0);
         float world_distance = length(world_position.xyz);
         float attenuation = 1.0 / ((1.0 + world_distance) * (1.0 + world_distance));
-        lighting = max(lighting, attenuation * handLightLevel_f * vec3(1.0, 0.8, 0.5) * 10.0);
+        lighting = max(lighting, attenuation * handLightLevel_f * vec3(1.0, 0.8, 0.5) * 30.0);
     }
 #endif
 
@@ -327,16 +327,22 @@ void main()
 
     vec4 materials = texture(specular, uv);
 
-    float roughness = 1.0 - materials.r;
+    float roughness = pow(1.0 - materials.r, 2.0);
 
     #ifdef WATER
+    float foam = getpeaks(world_position.xyz + cameraPosition, 1.0, 2, 4) * (getpeaks(world_position.xyz + cameraPosition, 1.0, 0, 2) * 0.7 + 0.3);
+
     if (block_id == 32)
     {
         roughness = 0.02;
         materials.g = 0.89;
     
         color.rgb = vertex_color.rgb * 0.5 + 0.5;
+
+        color.rgb = mix(color.rgb, vec3(1.0), foam);
     }
+
+    vec3 sun_color = texture(gaux3, project_skybox2uv(world_sun_dir), 3).rgb;
     #endif
 
     #define LIGHTING_SAMPLES 4 // [4 8 16]
@@ -437,11 +443,11 @@ void main()
         #endif
     }
 
-    #ifdef WATER
+    // #ifdef WATER
     lighting += image_based_lighting;
-    #else
-    lighting += image_based_lighting * F;
-    #endif
+    // #else
+    // lighting += image_based_lighting * F;
+    // #endif
 
     if (block_id < 9200)
     {
@@ -451,6 +457,15 @@ void main()
     {
         color.rgb += color.rgb * lighting;
     }
+
+    // color.rgb = image_based_lighting;
+
+    #ifdef WATER
+    if (block_id == 32)
+    {
+        color.rgb += foam * sun_color;
+    }
+    #endif
 
     #ifdef WATER
     if (block_id == 32)
@@ -495,6 +510,9 @@ void main()
 #ifdef ENTITY
     color.rgb += entityColor.rgb;
 #endif
+
+    // color.rgb = vec3(roughness);
+    // color.rgb = normal * 0.5 + 0.5;
 
     gl_FragData[0] = color;
 }

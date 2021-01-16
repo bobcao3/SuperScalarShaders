@@ -68,7 +68,7 @@ void main() {
     {
         current = pow(current, vec3(2.2));
 
-        vec4 fog = scatter(vec3(0.0, cameraPosition.y, 0.0), normalize(world_pos), world_sun_dir, view_distance * 50.0, 0.1);
+        vec4 fog = scatter(vec3(0.0, cameraPosition.y, 0.0), normalize(world_pos), world_sun_dir, view_distance * 50.0, 0.1) * (1.0 - rainStrength2 * 0.9);
         current = mix(fog.rgb, current, fog.a);
         current = pow(current, vec3(1.0 / 2.2));
     }

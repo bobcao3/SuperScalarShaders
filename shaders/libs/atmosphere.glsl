@@ -10,7 +10,7 @@
 
 float day = float(worldTime) / 24000.0;
 float day_cycle = mix(float(moonPhase), mod(float(moonPhase + 1), 8.0), day) + frameTimeCounter * 0.0001;
-float cloud_coverage = max(noise(vec2(day_cycle, 0.0)) * 0.05 + 0.45, rainStrength);
+float cloud_coverage = max(noise(vec2(day_cycle, 0.0)) * 0.05 + 0.45, rainStrength2);
 
 // ============
 const float g = .76;
@@ -65,7 +65,7 @@ float cloud_noise(in vec3 v, float t) {
 
 	n = n / maxAmplitude;
 
-	return smoothstep(0.0, 0.15 + rainStrength * 0.7, n - 0.9 + cloud_coverage * 1.8);
+	return smoothstep(0.0, 0.15 + rainStrength2 * 0.7, n - 0.9 + cloud_coverage * 1.8);
 }
 
 float cloud(vec3 p) {
@@ -84,9 +84,9 @@ void densities(in vec3 pos, out vec2 des) {
 	// Add Ozone layer densities
 	des.x += exp(-abs(h - 25e3) / 5e3) * 0.15;
 
-	des.y = exp(-h/Hm);
+	des.y = exp(-h/Hm) * (1.0 + rainStrength2 * 3.0);
 
-	// des.y += exp(-max(0.0, h/(Hm * 0.5))) * 5.0 * rainStrength;
+	// des.y += exp(-max(0.0, h/(Hm * 0.5))) * 5.0 * rainStrength2;
 }
 
 float densitiesCloud(in vec3 pos) {
@@ -95,7 +95,7 @@ float densitiesCloud(in vec3 pos) {
 	float c = 0.0;
 
 	if (cloudAltitude - cloudDepth < h && cloudAltitude + cloudDepth > h) {
-		c = mix(cloud(pos), rainStrength * 30.0, smoothstep(30e3, 250e3, length(pos)));
+		c = mix(cloud(pos), rainStrength2 * 30.0, smoothstep(30e3, 250e3, length(pos)));
 		c *= max(0.0, sin(3.1415926 * ((h - cloudAltitude) / cloudDepth * 0.5 + 0.5)));
 	}
 

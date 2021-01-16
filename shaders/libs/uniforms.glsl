@@ -67,7 +67,7 @@ uniform sampler2D gaux4; // colortex7
 #define _INCLUDE_TIME
 uniform int worldTime;
 uniform int moonPhase;
-uniform float rainStrength;
+uniform float rainStrength2;
 uniform float wetness;
 uniform float frameTimeCounter;
 #endif
