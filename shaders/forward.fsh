@@ -14,9 +14,10 @@ in VertexOut {
 #endif
 #ifdef POM
     vec3 tangentpos;
+#endif
+
     vec2 miduv;
     flat vec2 bound_uv;
-#endif
 
 #ifdef WIREFRAME
     vec4 bary;
@@ -249,7 +250,33 @@ void main()
     #define uv adj_uv
 #endif
 
-    vec4 color = texture(tex, uv) * vertex_color;
+    vec2 atlas_size = textureSize(tex, 0);
+
+    vec2 ddx = dFdx(uv);
+    vec2 ddy = dFdy(uv);
+
+    float dL = min(length(ddx * atlas_size), length(ddy * atlas_size));
+    float lod = clamp(round(log2(dL) - 1.0), 0, 3);
+
+    vec4 color = vec4(0.0);
+    
+    #define AF_TAPS 8 // [2 4 8 16]
+
+    vec2 rect_size = abs(bound_uv - miduv);
+    
+    for (int i = 0; i < AF_TAPS; i++)
+    {
+        vec2 offset = WeylNth(i);
+
+        vec2 offset_from_mid = uv + (offset - 0.5) * max(ddx, ddy) - miduv;
+        vec2 uv_offset = miduv + mod(abs(offset_from_mid), rect_size) * sign(offset_from_mid);
+
+        color += textureLod(tex, uv_offset, lod);
+    }
+
+    color /= float(AF_TAPS);
+
+    color *= vertex_color;
     
     if (color.a < 0.1)
     {
@@ -337,7 +364,7 @@ void main()
         roughness = 0.02;
         materials.g = 0.89;
     
-        color.rgb = vertex_color.rgb * 0.5 + 0.5;
+        color.rgb = vertex_color.rgb;// * 0.5 + 0.5;
 
         color.rgb = mix(color.rgb, vec3(1.0), foam);
     }

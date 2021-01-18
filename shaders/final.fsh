@@ -20,11 +20,14 @@ uniform sampler2D shadowtex0;
 // Do nothing because stupid optifine
 #endif
 
+uniform vec2 invWidthHeight;
+
 void main()
 {
     ivec2 iuv = ivec2(gl_FragCoord.st);
+    vec2 uv = gl_FragCoord.st * invWidthHeight;
 
-    vec3 color = texelFetch(colortex2, iuv, 0).rgb;
+    vec3 color = textureLod(colortex2, uv, 0).rgb;
 
     color = ACESFitted(color) * 1.1;
 

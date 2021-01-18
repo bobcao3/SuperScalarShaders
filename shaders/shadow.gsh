@@ -62,7 +62,7 @@ void main()
 
     vec3 actual_normal = normalize(cross(vertex_in[0].vertex_world_pos.xyz - vertex_in[1].vertex_world_pos.xyz, vertex_in[0].vertex_world_pos.xyz - vertex_in[2].vertex_world_pos.xyz));
     
-    average_world_pos -= normalize(vertex_in[0].vertex_normal) * 0.1;
+    average_world_pos -= normalize(vertex_in[0].vertex_normal) * 0.05;
 
     ivec3 block_pos = getVolumePos(average_world_pos, cameraPosition);
     ivec2 planar_pos = volume2planar(block_pos);

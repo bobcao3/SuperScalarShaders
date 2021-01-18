@@ -16,7 +16,7 @@ const int gaux2Format = RGBA16F;
 const int gaux3Format = R11F_G11F_B10F;
 const int gaux4Format = R11F_G11F_B10F;
 
-const float sunPathRotation = -43.0f;
+const float sunPathRotation = -33.0f;
 
 */
 

@@ -62,7 +62,8 @@ void main() {
     {
         vec3 ambient = texture(gaux3, project_skybox2uv(world_sun_dir), 3).rgb;
         ambient = ambient * 0.5 + dot(ambient, vec3(0.333)) * 0.5;
-        current = mix(current, vec3(0.1, 0.6, 1.0) * ambient * 0.1, smoothstep(view_distance, 0.0, 32.0));
+        float strength = exp(-view_distance * 0.05);
+        current = mix(vec3(0.1, 0.6, 1.0) * ambient * 0.1, current * vec3(0.8, 0.9, 1.0), sin(clamp(strength, 0.0, 1.0)));
     }
     else if (depth <= 0.999999f && biomeCategory != 16)
     {
@@ -93,7 +94,10 @@ void main() {
         }        
     }
 
-    vl *= 0.002;
+    if (isEyeInWater == 1)
+        vl *= vec3(0.002, 0.006, 0.01);
+    else
+        vl *= 0.002;
 
     current += vl;
 #endif
@@ -111,16 +115,18 @@ void main() {
         }
     }
 
-    vec3 s00 = sampleHistory(ivec2(iprev_uv), min_neighbor0, max_neighbor0);
-    vec3 s01 = sampleHistory(ivec2(iprev_uv) + ivec2(0, 1), min_neighbor0, max_neighbor0);
-    vec3 s10 = sampleHistory(ivec2(iprev_uv) + ivec2(1, 0), min_neighbor0, max_neighbor0);
-    vec3 s11 = sampleHistory(ivec2(iprev_uv) + ivec2(1, 1), min_neighbor0, max_neighbor0);
+    // vec3 s00 = sampleHistory(ivec2(iprev_uv), min_neighbor0, max_neighbor0);
+    // vec3 s01 = sampleHistory(ivec2(iprev_uv) + ivec2(0, 1), min_neighbor0, max_neighbor0);
+    // vec3 s10 = sampleHistory(ivec2(iprev_uv) + ivec2(1, 0), min_neighbor0, max_neighbor0);
+    // vec3 s11 = sampleHistory(ivec2(iprev_uv) + ivec2(1, 1), min_neighbor0, max_neighbor0);
 
-    vec3 history = mix(
-        mix(s00, s10, prev_uv_texels.x - iprev_uv.x),
-        mix(s01, s11, prev_uv_texels.x - iprev_uv.x),
-        prev_uv_texels.y - iprev_uv.y
-    );
+    // vec3 history = mix(
+    //     mix(s00, s10, prev_uv_texels.x - iprev_uv.x),
+    //     mix(s01, s11, prev_uv_texels.x - iprev_uv.x),
+    //     prev_uv_texels.y - iprev_uv.y
+    // );
+
+    vec3 history = clamp(texture(colortex2, prev_uv, 0).rgb, min_neighbor0, max_neighbor0);
 
     if (prev_uv.x < 0.0 || prev_uv.x > 1.0 || prev_uv.y < 0.0 || prev_uv.y > 1.0) history = current.rgb;
 

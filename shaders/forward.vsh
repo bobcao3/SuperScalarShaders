@@ -20,9 +20,10 @@ out VertexOut {
 #endif
 #ifdef POM
     vec3 tangentpos;
+#endif
+
     vec2 miduv;
     flat vec2 bound_uv;
-#endif
 
 #ifdef WIREFRAME
     vec4 bary;
@@ -123,9 +124,10 @@ void main()
 #ifdef POM
 	mat3 TBN = mat3(tangent, bitangent, world_normal);
 	tangentpos = normalize(world_position.xyz * TBN);
+#endif
+
     miduv = mc_midTexCoord.st;
     bound_uv = uv;
-#endif
 
     vertex_color = gl_Color;
     vertex_normal = world_normal;
