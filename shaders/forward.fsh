@@ -262,6 +262,7 @@ void main()
     
     #define AF_TAPS 8 // [2 4 8 16]
 
+#ifdef USE_AF
     vec2 rect_size = abs(bound_uv - miduv);
     
     for (int i = 0; i < AF_TAPS; i++)
@@ -275,6 +276,9 @@ void main()
     }
 
     color /= float(AF_TAPS);
+#else
+    color = texture(tex, uv);
+#endif
 
     color *= vertex_color;
     

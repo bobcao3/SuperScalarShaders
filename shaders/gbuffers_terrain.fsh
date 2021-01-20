@@ -4,6 +4,7 @@
 
 #pragma optimize(on)
 
+#define USE_AF
 #define NORMAL_MAPPING
 #define POM
 
