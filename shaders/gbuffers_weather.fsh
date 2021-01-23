@@ -32,6 +32,8 @@ void main()
         color.rgb = fromGamma(color.rgb);
         color.rgb *= max(fogColor, lighting.rgb * 10.0);
         color.rgb = toGamma(color.rgb);
+
+        color.a *= 0.3;
     }
 
     gl_FragData[0] = color;

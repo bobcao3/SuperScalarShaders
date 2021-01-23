@@ -2,6 +2,25 @@
 
 /* DRAWBUFFERS: 02 */
 
+/*
+
+const float shadowDistance = 70.0f;
+const float shadowDistanceRenderMul = 1.0f;
+const float shadowIntervalSize = 1.0f;
+
+const int colortex0Format = R11F_G11F_B10F;
+const int colortex2Format = R11F_G11F_B10F;
+const int colortex3Format = R11F_G11F_B10F;
+
+const int gaux1Format = R11F_G11F_B10F;
+const int gaux2Format = RGBA16F;
+const int gaux3Format = R11F_G11F_B10F;
+const int gaux4Format = R11F_G11F_B10F;
+
+const float sunPathRotation = -33.0f;
+
+*/
+
 const bool colortex2Clear = false;
 const bool gaux3Clear = false;
 

@@ -72,7 +72,7 @@ vec2 ParallaxMapping(in vec2 coord) {
 			lazyx += lazyinc;
 
 			vec2 offset_from_mid = coord + offset.st - miduv;
-            adjusted = miduv + mod(abs(offset_from_mid), rect_size) * sign(offset_from_mid);
+            adjusted = miduv + clamp(offset_from_mid, -rect_size, rect_size);// * sign(offset_from_mid);
 		
         	heightmap = texture(normals, adjusted).a - 1.0f;
 			if (max(0.0, offset.z - heightmap) < 0.01) break;
@@ -270,7 +270,7 @@ void main()
         vec2 offset = WeylNth(i);
 
         vec2 offset_from_mid = uv + (offset - 0.5) * max(ddx, ddy) - miduv;
-        vec2 uv_offset = miduv + mod(abs(offset_from_mid), rect_size) * sign(offset_from_mid);
+        vec2 uv_offset = miduv + clamp(offset_from_mid, -rect_size, rect_size);
 
         color += textureLod(tex, uv_offset, lod);
     }
@@ -474,19 +474,15 @@ void main()
         #endif
     }
 
-    // #ifdef WATER
-    lighting += image_based_lighting;
-    // #else
-    // lighting += image_based_lighting * F;
-    // #endif
-
     if (block_id < 9200)
     {
+        lighting += image_based_lighting;
         color.rgb *= lighting;
     }
     else
     {
-        color.rgb += color.rgb * lighting;
+        // color.rgb += color.rgb * lighting * 2.0;
+        color.rgb *= 5.0;
     }
 
     // color.rgb = image_based_lighting;
