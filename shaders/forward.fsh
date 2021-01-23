@@ -269,13 +269,13 @@ void main()
     {
         vec2 offset = WeylNth(i);
 
-        vec2 offset_from_mid = uv + (offset - 0.5) * max(ddx, ddy) - miduv;
-        vec2 uv_offset = miduv + clamp(offset_from_mid, -rect_size, rect_size);
+        vec2 uv_offset = uv + (offset - 0.5) * max(ddx, ddy);
 
-        color += textureLod(tex, uv_offset, lod);
+        color.rgb += textureLod(tex, uv_offset, lod).rgb;
     }
 
-    color /= float(AF_TAPS);
+    color.rgb /= float(AF_TAPS);
+    color.a = textureLod(tex, uv, lod).a;
 #else
     color = texture(tex, uv);
 #endif

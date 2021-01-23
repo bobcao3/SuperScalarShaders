@@ -58,7 +58,7 @@ void main() {
     // color = texture(colortex3, uv).rgb;
     #endif
 
-    vec3 vl;
+    vec3 vl = vec3(0.0);
     iuv *= 2;
 
     if (iuv.x < viewWidth && iuv.y < viewHeight)
@@ -68,7 +68,7 @@ void main() {
         vec3 view_pos = proj2view(proj_pos);
         vec3 world_pos = view2world(view_pos);
 
-        vec3 vl = texelFetch(colortex1, iuv, 0).rgb;
+        // vl = texelFetch(colortex1, iuv, 0).rgb;
 
         float view_distance = length(view_pos);
 
