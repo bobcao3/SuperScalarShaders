@@ -269,7 +269,8 @@ void main()
     {
         vec2 offset = WeylNth(i);
 
-        vec2 uv_offset = uv + (offset - 0.5) * max(ddx, ddy);
+        vec2 offset_from_mid = uv + (offset - 0.5) * max(ddx, ddy) - miduv;
+        vec2 uv_offset = miduv + clamp(offset_from_mid, -rect_size, rect_size);// * sign(offset_from_mid);
 
         color.rgb += textureLod(tex, uv_offset, lod).rgb;
     }

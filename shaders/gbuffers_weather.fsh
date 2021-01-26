@@ -20,6 +20,8 @@ uniform sampler2D tex;
 
 uniform vec3 fogColor;
 
+uniform int precipitation;
+
 void main()
 {
     vec4 color = vertex_color;
@@ -33,7 +35,7 @@ void main()
         color.rgb *= max(fogColor, lighting.rgb * 10.0);
         color.rgb = toGamma(color.rgb);
 
-        color.a *= 0.3;
+        if (precipitation != 2) color.a *= 0.3;
     }
 
     gl_FragData[0] = color;

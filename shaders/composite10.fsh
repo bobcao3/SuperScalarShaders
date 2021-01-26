@@ -48,10 +48,6 @@ void main() {
     vec3 view_pos = proj2view(proj_pos);
     vec3 world_pos = view2world(view_pos);
 
-    vec4 world_pos_prev = vec4(world_pos - previousCameraPosition + cameraPosition, 1.0);
-    vec4 proj_pos_prev = gbufferPreviousProjection * (gbufferPreviousModelView * world_pos_prev);
-    proj_pos_prev.xy /= proj_pos_prev.w;
-
     vec3 current = texelFetch(colortex0, iuv, 0).rgb;
 
     float view_distance = length(view_pos);
@@ -77,13 +73,6 @@ void main() {
     {
         current = mix(current, pow(fogColor, vec3(2.2)) * 10.0, smoothstep(0.0, 256.0, view_distance));
     }
-
-    if (isnan(current.r) || isnan(current.g) || isnan(current.b)) current = vec3(0.0);
-
-    vec2 prev_uv = (proj_pos_prev.xy * 0.5 + 0.5);
-    vec2 prev_uv_texels = prev_uv * vec2(viewWidth, viewHeight);
-    vec2 iprev_uv = floor(prev_uv_texels);
-    prev_uv += 0.5 * invWidthHeight;
 
     vec3 vl = vec3(0.0);
 

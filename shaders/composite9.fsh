@@ -18,15 +18,6 @@ const bool gaux3Clear = false;
 
 #include "voxelize.glslinc"
 
-vec3 sampleHistory(ivec2 iuv, vec3 min_bound, vec3 max_bound)
-{
-#ifdef TAA_NO_CLIP
-    return texelFetch(colortex2, iuv, 0).rgb;
-#else
-    return clamp(texelFetch(colortex2, iuv, 0).rgb, min_bound, max_bound);
-#endif
-}
-
 uniform int frameCounter;
 
 uniform vec3 fogColor;

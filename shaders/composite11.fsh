@@ -1,100 +1,68 @@
 #version 420 compatibility
 #pragma optimize(on)
 
-#include "/libs/compat.glsl"
+uniform sampler2D colortex0;
+uniform sampler2D depthtex0;
 
-const bool colortex2Clear = false;
-const bool gaux3Clear = false;
-const bool gaux4Clear = false;
+uniform vec2 invWidthHeight;
+uniform float aspectRatio;
 
-#define VECTORS
-#define TRANSFORMATIONS_RESIDUAL
+uniform float near;
+uniform float far;
 
-#include "/libs/transform.glsl"
-#include "/libs/noise.glsl"
-#include "/libs/atmosphere.glsl"
+uniform mat4 gbufferProjection;
 
-// #define TAA_NO_CLIP
+uniform float centerDepthSmooth;
 
-#include "voxelize.glslinc"
-
-vec3 sampleHistory(ivec2 iuv, vec3 min_bound, vec3 max_bound)
-{
-#ifdef TAA_NO_CLIP
-    return texelFetch(colortex2, iuv, 0).rgb;
-#else
-    return clamp(texelFetch(colortex2, iuv, 0).rgb, min_bound, max_bound);
-#endif
+float linearizeDepth(in float d) {
+    return (2 * near) / (far + near - (d * 2.0 - 1.0) * (far - near));
 }
 
-uniform int frameCounter;
+const float sensorHeight = 0.024f; // full-frame (24mm)
+const float sensorWidth = 0.036f; // full-frame (24mm)
 
-uniform vec3 fogColor;
+float getCoC(float depth, float A, float f, float S1, float maxCoC)
+{
+    float S2 = depth * far;
+    S1 = S1 * far;
 
-uniform int biomeCategory;
+    float c = A * (abs(S2 - S1) / S2 * (f / (S1 - f)));
 
-#include "/libs/taa.glsl"
+    float percentOfSensor = c / sensorHeight;
 
-uniform int isEyeInWater;
+    return clamp(percentOfSensor, 0.0, maxCoC);
+}
 
-#define VOLUMETRIC_LIGHTING
-
-void main() {
+void main()
+{
     ivec2 iuv = ivec2(gl_FragCoord.st);
     vec2 uv = gl_FragCoord.st * invWidthHeight;
 
-    float depth = getDepth(iuv);
-    vec3 proj_pos = getProjPos(iuv, depth);
-    vec3 view_pos = proj2view(proj_pos);
-    vec3 world_pos = view2world(view_pos);
+    vec3 color = vec3(0.0);
 
-    vec4 world_pos_prev = vec4(world_pos - previousCameraPosition + cameraPosition, 1.0);
-    vec4 proj_pos_prev = gbufferPreviousProjection * (gbufferPreviousModelView * world_pos_prev);
-    proj_pos_prev.xy /= proj_pos_prev.w;
+    if (uv.x > 0.5 || uv.y > 0.5) return;
 
-    vec3 current = texelFetch(colortex0, iuv, 0).rgb;
+    uv *= 2.0;
 
-    if (isnan(current.r) || isnan(current.g) || isnan(current.b)) current = vec3(0.0);
+    float depth = textureLod(depthtex0, uv, 1).r;
+    float depth_linear = linearizeDepth(depth);
+    float center_depth_linear = linearizeDepth(centerDepthSmooth);
 
-    vec2 prev_uv = (proj_pos_prev.xy * 0.5 + 0.5);
-    vec2 prev_uv_texels = prev_uv * vec2(viewWidth, viewHeight);
-    vec2 iprev_uv = floor(prev_uv_texels);
-    prev_uv += 0.5 * invWidthHeight;
+    float focalLength = gbufferProjection[0][0] * sensorWidth * 0.5;
 
-    vec3 min_neighbor0 = current;
-    vec3 max_neighbor0 = current;
+#define APERATURE 2.0 // [0.95 1.2 1.4 1.8 2.0 2.2 2.4 2.8 3.2 3.6 4.8 5.6 6.4 8.0]
 
-    for (int i = -1; i <= 1; i++)
-    {
-        for (int j = -1; j <= 1; j++) if (i != 0 || j != 0)
-        {
-            vec3 s = texelFetch(colortex0, iuv + ivec2(i, j), 0).rgb;
-            min_neighbor0 = min(min_neighbor0, s);
-            max_neighbor0 = max(max_neighbor0, s);
-        }
-    }
+    float CoC = getCoC(depth_linear, focalLength / 2.8, focalLength, center_depth_linear, 0.01);
 
-    // vec3 s00 = sampleHistory(ivec2(iprev_uv), min_neighbor0, max_neighbor0);
-    // vec3 s01 = sampleHistory(ivec2(iprev_uv) + ivec2(0, 1), min_neighbor0, max_neighbor0);
-    // vec3 s10 = sampleHistory(ivec2(iprev_uv) + ivec2(1, 0), min_neighbor0, max_neighbor0);
-    // vec3 s11 = sampleHistory(ivec2(iprev_uv) + ivec2(1, 1), min_neighbor0, max_neighbor0);
+    vec2 CoC_near_far;
 
-    // vec3 history = mix(
-    //     mix(s00, s10, prev_uv_texels.x - iprev_uv.x),
-    //     mix(s01, s11, prev_uv_texels.x - iprev_uv.x),
-    //     prev_uv_texels.y - iprev_uv.y
-    // );
+    if (depth >= centerDepthSmooth)
+        CoC_near_far = vec2(CoC, 0.0);
+    else
+        CoC_near_far = vec2(0.0, CoC);
 
-    vec3 history = clamp(texture(colortex2, prev_uv, 0).rgb, min_neighbor0, max_neighbor0);
+    if (depth < 0.7) CoC_near_far = vec2(0.0);
 
-    if (prev_uv.x < 0.0 || prev_uv.x > 1.0 || prev_uv.y < 0.0 || prev_uv.y > 1.0) history = current.rgb;
-
-    vec3 color = mix(history, current.rgb, 0.2);
-
-    if (depth <= 0.7) {
-        color = current.rgb;
-    }
-
-/* DRAWBUFFERS:2 */
-    gl_FragData[0] = vec4(color, 1.0);
+/* DRAWBUFFERS:7 */
+    gl_FragData[0] = vec4(CoC_near_far, 0.0, 1.0);
 }
