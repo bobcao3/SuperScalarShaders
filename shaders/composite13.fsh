@@ -35,18 +35,18 @@ void main()
         float depth_linear = linearizeDepth(depth);
         float center_depth_linear = linearizeDepth(centerDepthSmooth);
 
-        // vec2 CoC_center = texture(gaux4, uv * 0.5).rg;
+        vec2 CoC_center = texture(gaux4, uv * 0.5).rg;
 
         vec4 dof_image = texture(colortex3, uv * 0.5);
 
-        // float blend_weight = clamp(max(CoC_center.r, CoC_center.g) * 100.0, 0.0, 1.0);
-        float blend_weight = clamp(dof_image.a * 100.0, 0.0, 1.0);
+        float blend_weight = clamp(max(CoC_center.r, CoC_center.g) * 200.0, 0.0, 1.0);
+        // float blend_weight = clamp(dof_image.a * 300.0, 0.0, 1.0);
         color = mix(color, dof_image.rgb, blend_weight);
 
         // color = vec3(blend_weight);
     }
 
 /* DRAWBUFFERS:0 */
-    gl_FragData[0] = vec4(color, 1.0);
+    gl_FragData[0] = vec4(pow(color, vec3(1.0 / 2.2)), 1.0);
 }
 #endif

@@ -99,14 +99,18 @@ void main()
     float depth_linear = linearizeDepth(depth);
     float center_depth_linear = linearizeDepth(centerDepthSmooth);
 
+    float far_cut_linear = center_depth_linear * 1.1;
+
     vec2 CoC_center = texelFetch(gaux4, iuv, 0).rg;
+
+    float radius = max(CoC_center.r, CoC_center.g);
 
     float weight = 0.0;
     float max_coc = 0.0;
 
     for (int i = 0; i < 64; i++)
     {
-        vec2 offset = poisson64[i] * 0.01;
+        vec2 offset = poisson64[i] * radius;
         vec2 uv_test = uv + offset * vec2(1.0, aspectRatio) * 0.5;
         vec2 uv_test_half = uv_test * 0.5;
 
@@ -114,9 +118,9 @@ void main()
 
         float test_offset_length = length(offset);
 
-        float depth_test = textureLod(depthtex0, uv_test, 1).r;
+        // float depth_test = linearizeDepth(textureLod(depthtex0, uv_test, 1).r);
 
-        if ((test_offset_length <= CoC.r && depth_test <= depth) || (test_offset_length <= CoC.g && depth_test >= depth))
+        if ((CoC_center.r > 0.0003 && CoC.r > 0.0003 && CoC.r >= test_offset_length) || (CoC_center.r <= 0.0003))
         {
             float sample_weight = 1.0;// - test_offset_length * 100.0;
 
@@ -128,6 +132,8 @@ void main()
     }
 
     color /= weight;
+
+    // if (depth_linear >= far_cut_linear) color = vec3(0.0);
 
 /* DRAWBUFFERS:3 */
     gl_FragData[0] = vec4(color, max_coc);

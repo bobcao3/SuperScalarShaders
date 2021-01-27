@@ -38,6 +38,7 @@ uniform int biomeCategory;
 uniform int isEyeInWater;
 
 #define VOLUMETRIC_LIGHTING
+#define DOF
 
 void main() {
     ivec2 iuv = ivec2(gl_FragCoord.st);
@@ -89,6 +90,10 @@ void main() {
         vl *= 0.002;
 
     current += vl;
+#endif
+
+#ifdef DOF
+    current = pow(current, vec3(2.2));
 #endif
 
 /* DRAWBUFFERS:0 */
