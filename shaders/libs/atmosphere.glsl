@@ -26,7 +26,11 @@ const vec3 bR = vec3(3.8e-6, 13.5e-6, 33.1e-6);
 
 #define CLOUD_STEPS 6 // [2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32]
 
+#ifdef LQ_ATMOS
+const int steps = 3;
+#else
 const int steps = 6;
+#endif
 const int stepss = 2;
 
 vec3 I = I0; // * (1.0 - cloud_coverage * 0.7);

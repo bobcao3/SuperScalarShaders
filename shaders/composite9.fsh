@@ -26,6 +26,8 @@ uniform int biomeCategory;
 
 #include "/libs/taa.glsl"
 
+#include "color.glslinc"
+
 uniform int isEyeInWater;
 
 void main() {
@@ -40,11 +42,11 @@ void main() {
     #ifdef BLOOM
     vec2 uv = vec2(iuv) * invWidthHeight;
 
-    color = pow(pow(color, vec3(2.2)) + (
+    color = color + (
         texture(colortex3, uv * 0.5).rgb * 0.3
       + texture(colortex3, uv * 0.125 + vec2(0.0, 0.75)).rgb * 0.3
       + texture(colortex3, uv * 0.03125 + vec2(0.5, 0.75)).rgb * 0.5
-    ) * 0.7, vec3(1.0 / 2.2));
+    ) * 0.7;
 
     // color = texture(colortex3, uv).rgb;
     #endif

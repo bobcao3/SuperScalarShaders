@@ -62,7 +62,7 @@ void main()
 
     color = mix(color, color * vec3(1.0, 1.0 - valHurt * 0.8, 1.0 - valHurt), blend_weight);
 
-    color = ACESFitted(color) * 1.1;
+    color = ACESFitted(toGamma(color)) * 1.1;
 
     // if (iuv.x < 1024 && iuv.y < 1024) color = texelFetch(gaux4, iuv, 0).rgb;
 

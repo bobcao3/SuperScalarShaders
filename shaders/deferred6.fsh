@@ -19,6 +19,8 @@ uniform vec3 fogColor;
 
 uniform int frameCounter;
 
+in vec3 world_sun_dir;
+
 void main()
 {
     ivec2 iuv = ivec2(gl_FragCoord.st);
@@ -28,7 +30,6 @@ void main()
     
         if (biomeCategory != 16) {
             vec3 dir = project_uv2skybox(vec2(iuv) * invWidthHeight);
-            vec3 world_sun_dir = mat3(gbufferModelViewInverse) * (sunPosition * 0.01);
 
             skybox = scatter(vec3(0.0, cameraPosition.y, 0.0), dir, world_sun_dir, Ra, 0.1) * 2.0 * (1.0 - rainStrength2 * 0.95);
 

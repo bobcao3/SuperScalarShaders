@@ -5,3 +5,5 @@ vec2 WeylNth(int n) {
 vec2 JitterSampleOffset(int frameCounter) {
 	return (WeylNth(int(mod(frameCounter, 16.0f))) * 2.0 - 1.0);
 }
+
+uniform vec2 taaOffset;

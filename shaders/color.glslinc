@@ -12,12 +12,22 @@ vec4 toGamma(vec4 c) {
     return pow(c, vec4(invGamma));
 }
 
+// #define HIGH_COLOR_PRECISION
+
 vec3 fromGamma(vec3 c) {
+#ifdef HIGH_COLOR_PRECISION
     return pow(c, vec3(gamma));
+#else
+    return c * c;
+#endif
 }
 
 vec3 toGamma(vec3 c) {
+#ifdef HIGH_COLOR_PRECISION
     return pow(c, vec3(invGamma));
+#else
+    return sqrt(c);
+#endif
 }
 
 float luma(vec3 c) {

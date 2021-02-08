@@ -10,6 +10,8 @@ const bool gaux4Clear = false;
 #define VECTORS
 #define TRANSFORMATIONS_RESIDUAL
 
+#define LQ_ATMOS
+
 #include "/libs/transform.glsl"
 #include "/libs/noise.glsl"
 #include "/libs/atmosphere.glsl"
@@ -38,7 +40,9 @@ uniform int biomeCategory;
 uniform int isEyeInWater;
 
 #define VOLUMETRIC_LIGHTING
-#define DOF
+// #define DOF
+
+#include "color.glslinc"
 
 void main() {
     ivec2 iuv = ivec2(gl_FragCoord.st);
@@ -64,36 +68,35 @@ void main() {
     }
     else if (depth <= 0.999999f && biomeCategory != 16)
     {
-        current = pow(current, vec3(2.2));
-
         vec4 fog = scatter(vec3(0.0, cameraPosition.y, 0.0), normalize(world_pos), world_sun_dir, view_distance * 50.0, 0.1) * (1.0 - rainStrength2 * 0.9);
         current = mix(fog.rgb, current, fog.a);
-        current = pow(current, vec3(1.0 / 2.2));
     }
     else if (biomeCategory == 16)
     {
-        current = mix(current, pow(fogColor, vec3(2.2)) * 10.0, smoothstep(0.0, 256.0, view_distance));
+        current = mix(current, fromGamma(fogColor) * 10.0, smoothstep(0.0, 256.0, view_distance));
     }
 
     vec3 vl = vec3(0.0);
 
 #ifdef VOLUMETRIC_LIGHTING
-    for (int i = -1; i <= 1; i++) {
-        for (int j = -1; j <= 1; j++) {
-            vl += texelFetch(colortex3, iuv / 2 + ivec2(i, j), 0).rgb;
-        }        
-    }
+    //for (int i = -1; i <= 1; i++) {
+    //    for (int j = -1; j <= 1; j++) {
+    //        vl += texelFetch(colortex3, iuv / 2 + ivec2(i, j), 0).rgb;
+    //    }        
+    //}
+    
+    vl += texture(colortex3, uv * 0.5).rgb;
 
     if (isEyeInWater == 1)
-        vl *= vec3(0.002, 0.006, 0.01);
+        vl *= vec3(0.02, 0.06, 0.1);
     else
-        vl *= 0.002;
+        vl *= 0.02;
 
     current += vl;
 #endif
 
 #ifdef DOF
-    current = pow(current, vec3(2.2));
+    //current = current;
 #endif
 
 /* DRAWBUFFERS:0 */

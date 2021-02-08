@@ -19,6 +19,8 @@ in VertexOut {
     vec2 miduv;
     flat vec2 bound_uv;
 
+    float fade_distance;
+
 #ifdef WIREFRAME
     vec4 bary;
 #endif
@@ -289,10 +291,16 @@ void main()
         return;
     }
 
+    color.rgb = fromGamma(color.rgb);
+
 #ifdef NORMAL_MAPPING
     vec3 normal_map;
+#ifdef LABPBR_STRICT_NORMAL_ENCODING
     normal_map.xy = texture(normals, uv).rg * 2.0 - 1.0;
     normal_map.z = sqrt(max(0.0001, 1.0 - dot(normal_map.xy, normal_map.xy)));
+#else
+    normal_map.xyz = texture(normals, uv).rgb * 2.0 - 1.0;
+#endif
     normal_map = mat3(tangent, bitangent, normal) * normal_map;
     if (normal_map.xy != vec2(0.0))
         normal = normal_map;
@@ -303,7 +311,6 @@ void main()
 #endif
 
     vec3 sample_pos_smooth = world_position.xyz + normal * 0.51 + mod(cameraPosition, 1.0);
-    // sample_pos_smooth.y += 0.5;
 
 #ifdef WATER
     ivec3 ioffset = ivec3(0);
@@ -349,8 +356,6 @@ void main()
 #endif
 
     vec3 reflection_dir = reflect(world_dir, normal);
-
-    color.rgb = fromGamma(color.rgb);
 
     vec3 world_sun_dir = mat3(gbufferModelViewInverse) * sunPosition * 0.01;
 
@@ -436,7 +441,7 @@ void main()
                 vec4 voxel_color = texelFetch(shadowcolor0, planar_pos, 0);
                 float voxel_attribute = texelFetch(shadowtex0, planar_pos, 0).r;
 
-                hitcolor *= pow(voxel_color.rgb, vec3(2.2));
+                hitcolor *= (voxel_color.rgb);
 
                 bool is_lightsource = (voxel_attribute > 0.54 && voxel_attribute < 0.56);
 
@@ -447,7 +452,7 @@ void main()
                     ivec3 volume_pos_prev = getVolumePos(sample_pos - sample_dir * 0.5, cameraPosition) + ioffset;
                     ivec2 planar_pos_prev = volume2planar(volume_pos_prev);
 
-                    if (!is_lightsource) hitcolor *= max(skybox_color * pow(lmcoord.y, 2.0) * 0.7, texelFetch(gaux2, planar_pos_prev, 0).rgb);
+                    if (!is_lightsource) hitcolor *= max(skybox_color * pow2(lmcoord.y) * 0.7, texelFetch(gaux2, planar_pos_prev, 0).rgb);
                     break;
                 }
             }
@@ -455,7 +460,7 @@ void main()
             hitcolor *= vertex_color.a;
         }
 
-        vec3 approxSkylight = pow(lmcoord.y, 2.0) * skybox_color;
+        vec3 approxSkylight = pow2(lmcoord.y) * skybox_color;
 
         #ifndef WATER
         // if (dot(sample_dir, vertex_normal) <= 0.0)
@@ -471,9 +476,11 @@ void main()
             image_based_lighting += hitcolor;
         }
         #else
-        image_based_lighting += pow(lmcoord.y, 3.0) * texture(gaux3, skybox_uv, 3).rgb * vertex_color.a;
+        image_based_lighting += pow3(lmcoord.y) * texture(gaux3, skybox_uv, 3).rgb * vertex_color.a;
         #endif
     }
+
+    image_based_lighting *= 4.0 / float(LIGHTING_SAMPLES);
 
     if (block_id < 9200)
     {
@@ -531,7 +538,7 @@ void main()
     #endif
 #endif
 
-    color.rgb = toGamma(color.rgb);
+    // color.rgb = toGamma(color.rgb);
 
     // color.rgb = lighting;
 
