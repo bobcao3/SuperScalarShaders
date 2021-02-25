@@ -2,11 +2,11 @@
 
 #pragma optimize(on)
 
-/* DRAWBUFFERS: 4 */
+/* RENDERTARGETS: 3 */
 
-const bool gaux1Clear = false;
-const bool gaux2Clear = false;
-const bool gaux3Clear = false;
+const bool colortex3Clear = false;
+const bool colortex5Clear = false;
+const bool colortex4Clear = false;
 
 #define FINAL_PROP
 

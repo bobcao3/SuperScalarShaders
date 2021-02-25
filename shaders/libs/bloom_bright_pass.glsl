@@ -11,7 +11,7 @@ void main() {
 
     vec2 uv = ((vec2(iuv) + vec2(PIXEL_OFFSET)) * invWidthHeight - BASE) * SCALE;
 
-/* DRAWBUFFERS:3 */
+/* RENDERTARGETS:8 */
 
     if (uv.x > 1.0 || uv.y > 1.0 || uv.x < 0.0 || uv.y < 0.0)
     {

@@ -4,8 +4,8 @@
 #include "/libs/compat.glsl"
 
 const bool colortex2Clear = false;
-const bool gaux3Clear = false;
-const bool gaux4Clear = false;
+const bool colortex4Clear = false;
+const bool colortex7Clear = false;
 
 #define VECTORS
 #define TRANSFORMATIONS_RESIDUAL

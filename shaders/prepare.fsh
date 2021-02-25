@@ -4,7 +4,7 @@
 
 #include "libs/compat.glsl"
 
-/* DRAWBUFFERS: 6 */
+/* RENDERTARGETS: 4 */
 
 #include "/libs/atmosphere.glsl"
 

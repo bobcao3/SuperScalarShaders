@@ -17,7 +17,7 @@ in VertexOut {
 #include "/libs/transform.glsl"
 #include "/libs/noise.glsl"
 
-// uniform sampler2D gaux3;
+// uniform sampler2D colortex4;
 
 void main()
 {
@@ -30,7 +30,7 @@ void main()
 
     // color *= max(0.0, world_dir.y);
 
-    // color.rgb += pow(texture(gaux3, project_skybox2uv(world_dir)).rgb, vec3(1.0 / 2.2)) + bayer2(gl_FragCoord.st) * 0.02;
+    // color.rgb += pow(texture(colortex4, project_skybox2uv(world_dir)).rgb, vec3(1.0 / 2.2)) + bayer2(gl_FragCoord.st) * 0.02;
 
     // color.a = 1.0;
 

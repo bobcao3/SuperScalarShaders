@@ -2,7 +2,7 @@
 
 #include "/color.glslinc"
 
-uniform sampler2D colortex3;
+uniform sampler2D colortex8;
 
 uniform vec2 invWidthHeight;
 
@@ -20,7 +20,7 @@ void main() {
 
     if (uv.x < BASE.x || uv.y < BASE.y || uv.x > BOUND.x || uv.y > BOUND.y)
     {
-        color = texelFetch(colortex3, iuv, 0).rgb;
+        color = texelFetch(colortex8, iuv, 0).rgb;
     }
     else
     {
@@ -34,11 +34,11 @@ void main() {
         {
             vec2 uv_offset = clamp(uv + DIR(i) * invWidthHeight + PREV_BASE, PREV_BASE, PREV_BOUND);
 
-            color += textureLod(colortex3, uv_offset, 1).rgb * kernels[i + 2];
+            color += textureLod(colortex8, uv_offset, 1).rgb * kernels[i + 2];
         }
     }
 
 
-/* DRAWBUFFERS:3 */
+/* RENDERTARGETS:8 */
     gl_FragData[0] = vec4(color, 1.0);
 }

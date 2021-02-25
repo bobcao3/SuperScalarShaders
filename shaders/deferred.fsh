@@ -4,13 +4,12 @@
 
 #include "libs/compat.glsl"
 
-/* DRAWBUFFERS: 04 */
+/* RENDERTARGETS: 0,3 */
 
 uniform sampler2D shadowcolor0;
 uniform sampler2D shadowtex0;
 
-uniform sampler2D gaux1;
-// uniform sampler2D gaux2;
+// uniform sampler2D colortex5;
 
 #include "voxelize.glslinc"
 
@@ -37,10 +36,10 @@ void main()
     if (depth >= 1.0)
     {
         color *= 3.0 * smoothstep(max(0.0, world_dir.y), 0.0, 0.03);
-        color += texture(gaux3, project_skybox2uv(world_dir)).rgb;
+        color += texture(colortex4, project_skybox2uv(world_dir)).rgb;
 
         vec3 world_sun_dir = mat3(gbufferModelViewInverse) * (sunPosition * 0.01);
-        vec3 ambient = texture(gaux3, project_skybox2uv(world_sun_dir), 3).rgb;
+        vec3 ambient = texture(colortex4, project_skybox2uv(world_sun_dir), 3).rgb;
         ambient = ambient * 0.5 + dot(ambient, vec3(0.333)) * 0.5;
 
         color += cloud2d(world_pos, cameraPosition) * ambient;
@@ -57,7 +56,7 @@ void main()
         ivec3 prev_volume_pos = volume_pos + ivec3(floor(cameraPosition) - floor(previousCameraPosition));
         ivec2 prev_planar_pos = volume2planar(prev_volume_pos);
 
-        vec4 prev_color = texelFetch(gaux1, prev_planar_pos, 0);
+        vec4 prev_color = texelFetch(colortex3, prev_planar_pos, 0);
         float prev_solid = prev_color.a;
 
         if (voxel_color.a > 0.9 && (voxel_attribute < 0.54 || voxel_attribute > 0.56))

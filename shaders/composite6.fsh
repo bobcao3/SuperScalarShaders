@@ -1,11 +1,11 @@
 #version 420 compatibility
 #pragma optimize(on)
 
-uniform sampler2D colortex3;
+uniform sampler2D colortex8;
 
 #define PIXEL_OFFSET 1.5
 
-#define ORIGIN colortex3
+#define ORIGIN colortex8
 #define SCALE 32.0
 #define BASE vec2(0.5, 0.75)
 

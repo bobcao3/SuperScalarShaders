@@ -4,14 +4,14 @@
 
 #include "libs/compat.glsl"
 
-/* DRAWBUFFERS: 6 */
+/* RENDERTARGETS: 4 */
 
 // #define DISABLE_MIE
 
 #include "/color.glslinc"
 #include "/libs/atmosphere.glsl"
 
-const bool gaux3Clear = false;
+const bool colortex4Clear = false;
 
 uniform int biomeCategory;
 
@@ -39,6 +39,6 @@ void main()
 
         gl_FragData[0] = skybox;
     } else {
-        gl_FragData[0] = texelFetch(gaux3, iuv, 0);
+        gl_FragData[0] = texelFetch(colortex4, iuv, 0);
     }
 }

@@ -3,8 +3,8 @@
 
 uniform sampler2D colortex0;
 uniform sampler2D depthtex0;
-uniform sampler2D colortex3;
-uniform sampler2D gaux4;
+uniform sampler2D colortex8;
+uniform sampler2D colortex7;
 
 uniform vec2 invWidthHeight;
 uniform float aspectRatio;
@@ -35,9 +35,9 @@ void main()
         float depth_linear = linearizeDepth(depth);
         float center_depth_linear = linearizeDepth(centerDepthSmooth);
 
-        vec2 CoC_center = texture(gaux4, uv * 0.5).rg;
+        vec2 CoC_center = texture(colortex7, uv * 0.5).rg;
 
-        vec4 dof_image = texture(colortex3, uv * 0.5);
+        vec4 dof_image = texture(colortex8, uv * 0.5);
 
         float blend_weight = clamp(max(CoC_center.r, CoC_center.g) * 200.0, 0.0, 1.0);
         // float blend_weight = clamp(dof_image.a * 300.0, 0.0, 1.0);

@@ -33,9 +33,8 @@ uniform sampler2D normals;
 #endif
 
 uniform sampler2D tex;
-uniform sampler2D gaux1;
-// uniform sampler2D gaux2;
-// uniform sampler2D gaux3;
+// uniform sampler2D colortex5;
+// uniform sampler2D colortex4;
 
 /* DRAWBUFFERS: 0 */
 
@@ -321,7 +320,7 @@ void main()
 #else
     if (fade_distance < 1.0)
     {
-        lighting = sample_lighting_bilinear(gaux2, sample_pos_smooth, ioffset);
+        lighting = sample_lighting_bilinear(colortex5, sample_pos_smooth, ioffset);
 
         int handLightLevel = max(heldBlockLightValue, heldBlockLightValue2);
         float handLightLevel_f = float(handLightLevel) * (1.0 / 240.0);
@@ -374,12 +373,12 @@ void main()
         color.rgb = mix(color.rgb, vec3(1.0), foam);
     }
 
-    vec3 sun_color = texture(gaux3, project_skybox2uv(world_sun_dir), 3).rgb;
+    vec3 sun_color = texture(colortex4, project_skybox2uv(world_sun_dir), 3).rgb;
     #endif
 
     #define LIGHTING_SAMPLES 4 // [4 8 16]
 
-    float hash1d = texelFetch(gaux4, ivec2(gl_FragCoord.st + WeylNth(frameCounter & 0xFFFF) * 256) & 0xFF, 0).r;    
+    float hash1d = texelFetch(colortex7, ivec2(gl_FragCoord.st + WeylNth(frameCounter & 0xFFFF) * 256) & 0xFF, 0).r;    
     float rand1d = hash1d * 65536.0;// + float(frameCounter & 0xFF);
 
     vec3 F = getF(materials.g, roughness, NdotV);
@@ -413,7 +412,7 @@ void main()
         bool hit = false;
         vec3 hitcolor = vec3(1.0);
 
-        vec3 skybox_color = texture(gaux3, skybox_uv, 3).rgb;
+        vec3 skybox_color = texture(colortex4, skybox_uv, 3).rgb;
 
         if ((fade_distance < 1.0) && (dot(sample_dir, vertex_normal) > 0.0))
         {
@@ -447,7 +446,7 @@ void main()
                     ivec3 volume_pos_prev = getVolumePos(sample_pos - sample_dir * 0.5, cameraPosition) + ioffset;
                     ivec2 planar_pos_prev = volume2planar(volume_pos_prev);
 
-                    if (!is_lightsource) hitcolor *= max(skybox_color * pow(lmcoord.y, 2.0) * 0.7, texelFetch(gaux2, planar_pos_prev, 0).rgb);
+                    if (!is_lightsource) hitcolor *= max(skybox_color * pow(lmcoord.y, 2.0) * 0.7, texelFetch(colortex5, planar_pos_prev, 0).rgb);
                     break;
                 }
             }
@@ -471,7 +470,7 @@ void main()
             image_based_lighting += hitcolor;
         }
         #else
-        image_based_lighting += pow(lmcoord.y, 3.0) * texture(gaux3, skybox_uv, 3).rgb * vertex_color.a;
+        image_based_lighting += pow(lmcoord.y, 3.0) * texture(colortex4, skybox_uv, 3).rgb * vertex_color.a;
         #endif
     }
 

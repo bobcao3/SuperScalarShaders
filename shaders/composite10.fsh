@@ -4,8 +4,8 @@
 #include "/libs/compat.glsl"
 
 const bool colortex2Clear = false;
-const bool gaux3Clear = false;
-const bool gaux4Clear = false;
+const bool colortex4Clear = false;
+const bool colortex7Clear = false;
 
 #define VECTORS
 #define TRANSFORMATIONS_RESIDUAL
@@ -57,7 +57,7 @@ void main() {
 
     if (isEyeInWater == 1)
     {
-        vec3 ambient = texture(gaux3, project_skybox2uv(world_sun_dir), 3).rgb;
+        vec3 ambient = texture(colortex4, project_skybox2uv(world_sun_dir), 3).rgb;
         ambient = ambient * 0.5 + dot(ambient, vec3(0.333)) * 0.5;
         float strength = exp(-view_distance * 0.05);
         current = mix(vec3(0.1, 0.6, 1.0) * ambient * 0.1, current * vec3(0.8, 0.9, 1.0), sin(clamp(strength, 0.0, 1.0)));
@@ -80,7 +80,7 @@ void main() {
 #ifdef VOLUMETRIC_LIGHTING
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
-            vl += texelFetch(colortex3, iuv / 2 + ivec2(i, j), 0).rgb;
+            vl += texelFetch(colortex8, iuv / 2 + ivec2(i, j), 0).rgb;
         }        
     }
 

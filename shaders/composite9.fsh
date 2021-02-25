@@ -5,7 +5,7 @@
 
 const bool colortex1Clear = false;
 const bool colortex2Clear = false;
-const bool gaux3Clear = false;
+const bool colortex4Clear = false;
 
 #define VECTORS
 #define TRANSFORMATIONS_RESIDUAL
@@ -41,12 +41,12 @@ void main() {
     vec2 uv = vec2(iuv) * invWidthHeight;
 
     color = pow(pow(color, vec3(2.2)) + (
-        texture(colortex3, uv * 0.5).rgb * 0.3
-      + texture(colortex3, uv * 0.125 + vec2(0.0, 0.75)).rgb * 0.3
-      + texture(colortex3, uv * 0.03125 + vec2(0.5, 0.75)).rgb * 0.5
+        texture(colortex8, uv * 0.5).rgb * 0.3
+      + texture(colortex8, uv * 0.125 + vec2(0.0, 0.75)).rgb * 0.3
+      + texture(colortex8, uv * 0.03125 + vec2(0.5, 0.75)).rgb * 0.5
     ) * 0.7, vec3(1.0 / 2.2));
 
-    // color = texture(colortex3, uv).rgb;
+    // color = texture(colortex8, uv).rgb;
     #endif
 
     vec3 vl = vec3(0.0);
@@ -79,8 +79,8 @@ void main() {
             vec2 uv0 = volume2planarUV(vec3(spos.x, floor(spos.y), spos.z));
             vec2 uv1 = volume2planarUV(vec3(spos.x, ceil(spos.y), spos.z));
 
-            vec3 voxel_sample0 = texture(gaux2, uv0 * invWidthHeight).rgb;
-            vec3 voxel_sample1 = texture(gaux2, uv1 * invWidthHeight).rgb;
+            vec3 voxel_sample0 = texture(colortex5, uv0 * invWidthHeight).rgb;
+            vec3 voxel_sample1 = texture(colortex5, uv1 * invWidthHeight).rgb;
 
             vec3 voxel_sample = mix(voxel_sample0, voxel_sample1, fract(spos.y));
 
@@ -88,7 +88,7 @@ void main() {
         }
     }
 
-/* DRAWBUFFERS:03 */
+/* RENDERTARGETS:0,8 */
     gl_FragData[0] = vec4(color, 1.0);
     gl_FragData[1] = vec4(vl, 1.0);
 }

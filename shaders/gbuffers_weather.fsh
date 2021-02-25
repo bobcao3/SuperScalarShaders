@@ -29,7 +29,7 @@ void main()
 
     if (color.a > 0.1)
     {
-        vec4 lighting = texelFetch(gaux2, volume2planar(getVolumePos(world_position.xyz, cameraPosition)), 0);
+        vec4 lighting = texelFetch(colortex5, volume2planar(getVolumePos(world_position.xyz, cameraPosition)), 0);
         
         color.rgb = fromGamma(color.rgb);
         color.rgb *= max(fogColor, lighting.rgb * 10.0);

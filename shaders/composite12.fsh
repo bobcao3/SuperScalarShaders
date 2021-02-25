@@ -3,7 +3,7 @@
 
 uniform sampler2D colortex0;
 uniform sampler2D depthtex0;
-uniform sampler2D gaux4;
+uniform sampler2D colortex7;
 
 const vec2 poisson64[64] = vec2[64] (
     vec2(0.0f, 0.0f),
@@ -101,7 +101,7 @@ void main()
 
     float far_cut_linear = center_depth_linear * 1.1;
 
-    vec2 CoC_center = texelFetch(gaux4, iuv, 0).rg;
+    vec2 CoC_center = texelFetch(colortex7, iuv, 0).rg;
 
     float radius = max(CoC_center.r, CoC_center.g);
 
@@ -114,7 +114,7 @@ void main()
         vec2 uv_test = uv + offset * vec2(1.0, aspectRatio) * 0.5;
         vec2 uv_test_half = uv_test * 0.5;
 
-        vec2 CoC = textureLod(gaux4, uv_test_half, 0).rg;
+        vec2 CoC = textureLod(colortex7, uv_test_half, 0).rg;
 
         float test_offset_length = length(offset);
 
@@ -135,6 +135,6 @@ void main()
 
     // if (depth_linear >= far_cut_linear) color = vec3(0.0);
 
-/* DRAWBUFFERS:3 */
+/* RENDERTARGETS:8 */
     gl_FragData[0] = vec4(color, max_coc);
 }

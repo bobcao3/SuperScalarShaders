@@ -185,7 +185,7 @@ vec2 getDensityFromMap(vec3 p, vec3 d)
 	uv.x = clamp(uv.x, 0.0, 0.25);
 
 	// return vec2(densitiesMap(uv));
-	return texture(gaux3, uv).xy;
+	return texture(colortex4, uv).xy;
 }
 
 void inScatter(vec3 p, vec3 D, float radius, vec2 depth, vec2 des, float nseed, out vec3 R, out vec3 M)
