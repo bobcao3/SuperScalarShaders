@@ -4,9 +4,9 @@
 
 #include "libs/compat.glsl"
 
-layout (local_size_x = 32, local_size_y = 32) in;
+// layout (local_size_x = 32, local_size_y = 32) in;
 
-const vec2 workGroupsRender = vec2(1.0f, 1.0f);
+// const vec2 workGroupsRender = vec2(1.0f, 1.0f);
 
 /* RENDERTARGETS: 1 */
 
@@ -30,7 +30,8 @@ layout (rgba16f) uniform image2D shadowcolorimg1;
 
 void main()
 {
-    ivec2 iuv = ivec2(gl_GlobalInvocationID.xy);
+    // ivec2 iuv = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 iuv = ivec2(gl_FragCoord.xy);
 
     vec4 voxel_color = texelFetch(shadowcolor0, iuv, 0).rgba;
     float voxel_attribute = texelFetch(shadowtex0, iuv, 0).r;
@@ -65,7 +66,7 @@ void main()
         }
     }
 
-    // gl_FragData[0] = vec4(voxel_color);
+    gl_FragData[0] = vec4(voxel_color);
 
-    imageStore(shadowcolorimg1, iuv, voxel_color);
+    // imageStore(shadowcolorimg1, iuv, voxel_color);
 }
