@@ -1,4 +1,4 @@
-#version 420 compatibility
+#version 430 compatibility
 
 /* DRAWBUFFERS: 02 */
 
@@ -24,7 +24,7 @@ const int colortex6Format = R11F_G11F_B10F;
 // 7: 
 const int colortex7Format = R11F_G11F_B10F;
 // 8: Post processing
-const int colortex8Format = RGBA16F;
+const int colortex8Format = R11F_G11F_B10F;
 
 const float sunPathRotation = -33.0f;
 

@@ -1,4 +1,4 @@
-#version 420 compatibility
+#version 430 compatibility
 #pragma optimize(on)
 
 #define PIXEL_OFFSET 0.5

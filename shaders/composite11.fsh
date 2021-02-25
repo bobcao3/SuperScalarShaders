@@ -1,4 +1,4 @@
-#version 420 compatibility
+#version 430 compatibility
 #pragma optimize(on)
 
 uniform sampler2D colortex0;

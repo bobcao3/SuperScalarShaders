@@ -1,4 +1,4 @@
-#version 420 compatibility
+#version 430 compatibility
 
 layout(triangles) in;
 layout(points, max_vertices = 1) out;

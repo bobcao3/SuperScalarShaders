@@ -1,3 +1,3 @@
-#version 420 compatibility
+#version 430 compatibility
 
 #include "forward.vsh"

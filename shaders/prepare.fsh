@@ -1,6 +1,12 @@
-#version 420 compatibility
+#version 430 compatibility
 
 #pragma optimize(on)
+
+// layout (local_size_x = 16, local_size_y = 16) in;
+
+// layout (rg32f) uniform image2D colorimg4;
+
+const vec2 workGroupsRender = vec2(0.5f, 0.5f);
 
 #include "libs/compat.glsl"
 
