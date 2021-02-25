@@ -373,7 +373,7 @@ void main()
         color.rgb = mix(color.rgb, vec3(1.0), foam);
     }
 
-    vec3 sun_color = texture(colortex4, project_skybox2uv(world_sun_dir), 3).rgb;
+    vec3 sun_color = sampleLODmanual(colortex4, project_skybox2uv(world_sun_dir), 3).rgb;
     #endif
 
     #define LIGHTING_SAMPLES 4 // [4 8 16]
@@ -403,16 +403,18 @@ void main()
 
         vec2 skybox_uv = project_skybox2uv(sample_dir);
         
-        if (roughness > 0.3)
-        {
-            skybox_uv.x += 0.25 + 8.0 * invWidthHeight.x;
-        }
+        // if (roughness > 0.3)
+        // {
+        //     skybox_uv.x += 0.25 + 8.0 * invWidthHeight.x;
+        // }
+
+        int skybox_lod = int(ceil(pow(roughness, 0.25) * 6.0));
 
         #ifdef VOXEL_RAYTRACED_AO
         bool hit = false;
         vec3 hitcolor = vec3(1.0);
 
-        vec3 skybox_color = texture(colortex4, skybox_uv, 3).rgb;
+        vec3 skybox_color = sampleLODmanual(colortex4, skybox_uv, skybox_lod).rgb;
 
         if ((fade_distance < 1.0) && (dot(sample_dir, vertex_normal) > 0.0))
         {
@@ -470,7 +472,7 @@ void main()
             image_based_lighting += hitcolor;
         }
         #else
-        image_based_lighting += pow(lmcoord.y, 3.0) * texture(colortex4, skybox_uv, 3).rgb * vertex_color.a;
+        image_based_lighting += pow(lmcoord.y, 3.0) * sampleLODmanual(colortex4, skybox_uv, skybox_lod).rgb * vertex_color.a;
         #endif
     }
 

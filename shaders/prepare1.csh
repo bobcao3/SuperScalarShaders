@@ -2,9 +2,13 @@
 
 #pragma optimize(on)
 
-#include "libs/compat.glsl"
+layout (local_size_x = 32, local_size_y = 32) in;
 
-/* RENDERTARGETS: 4 */
+layout (r11f_g11f_b10f) uniform image2D colorimg4;
+
+const vec2 workGroupsRender = vec2(0.3f, 0.13f);
+
+#include "libs/compat.glsl"
 
 // #define DISABLE_MIE
 
@@ -21,9 +25,9 @@ uniform int frameCounter;
 
 void main()
 {
-    ivec2 iuv = ivec2(gl_FragCoord.st);
+    ivec2 iuv = ivec2(gl_GlobalInvocationID.xy);
 
-    if (iuv.y <= (int(viewHeight) >> 3) + 8 && iuv.x <= (int(viewWidth) >> 2) + 8 && frameCounter % 2 == 0) {
+    if (frameCounter % 2 == 1) {
         vec4 skybox = vec4(0.0);
     
         if (biomeCategory != 16) {
@@ -37,8 +41,6 @@ void main()
             skybox = vec4(fromGamma(fogColor), 0.0);
         }
 
-        gl_FragData[0] = skybox;
-    } else {
-        gl_FragData[0] = texelFetch(colortex4, iuv, 0);
+        imageStore(colorimg4, iuv, skybox);
     }
 }

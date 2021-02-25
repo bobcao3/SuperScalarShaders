@@ -57,7 +57,7 @@ void main() {
 
     if (isEyeInWater == 1)
     {
-        vec3 ambient = texture(colortex4, project_skybox2uv(world_sun_dir), 3).rgb;
+        vec3 ambient = sampleLODmanual(colortex4, project_skybox2uv(world_sun_dir), 3).rgb;
         ambient = ambient * 0.5 + dot(ambient, vec3(0.333)) * 0.5;
         float strength = exp(-view_distance * 0.05);
         current = mix(vec3(0.1, 0.6, 1.0) * ambient * 0.1, current * vec3(0.8, 0.9, 1.0), sin(clamp(strength, 0.0, 1.0)));

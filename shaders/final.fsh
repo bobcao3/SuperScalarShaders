@@ -33,13 +33,13 @@ const float sunPathRotation = -33.0f;
 const bool colortex2Clear = false;
 const bool colortex4Clear = false;
 
-uniform sampler2D colortex2;
-uniform sampler2D colortex3;
-uniform sampler2D colortex5;
-uniform sampler2D colortex4;
-uniform sampler2D colortex7;
-uniform sampler2D shadowcolor0;
-uniform sampler2D shadowtex0;
+// uniform sampler2D colortex2;
+// uniform sampler2D colortex3;
+// uniform sampler2D colortex5;
+// uniform sampler2D colortex4;
+// uniform sampler2D colortex7;
+// uniform sampler2D shadowcolor0;
+// uniform sampler2D shadowtex0;
 
 #include "color.glslinc"
 
@@ -48,9 +48,11 @@ uniform sampler2D shadowtex0;
 // Do nothing because stupid optifine
 #endif
 
-uniform vec2 invWidthHeight;
+// uniform vec2 invWidthHeight;
 
 uniform float valHurt;
+
+#include "/libs/transform.glsl"
 
 void main()
 {
@@ -66,6 +68,8 @@ void main()
     color = ACESFitted(color) * 1.1;
 
     // if (iuv.x < 1024 && iuv.y < 1024) color = texelFetch(colortex7, iuv, 0).rgb;
+    // color = texelFetch(colortex4, iuv, 0).rgb;
+    // color = sampleLODmanual(colortex4, uv, 5).rgb;
 
     gl_FragColor = vec4(color, 1.0);
 }

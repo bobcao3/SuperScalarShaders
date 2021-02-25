@@ -52,6 +52,12 @@ vec2 project_skybox2uv(vec3 nwpos) {
     return rad;
 }
 
+vec3 sampleLODmanual(sampler2D s, vec2 uv, int lod)
+{
+    float h_offset = (1.0 - pow(0.5, float(lod)));
+    return texture(s, uv * pow(0.5, float(lod)) + vec2(h_offset, 0.0)).rgb;
+}
+
 float getDepth(in ivec2 iuv) {
     return texelFetch(depthtex0, iuv, 0).r;
 }

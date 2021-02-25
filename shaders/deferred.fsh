@@ -39,7 +39,7 @@ void main()
         color += texture(colortex4, project_skybox2uv(world_dir)).rgb;
 
         vec3 world_sun_dir = mat3(gbufferModelViewInverse) * (sunPosition * 0.01);
-        vec3 ambient = texture(colortex4, project_skybox2uv(world_sun_dir), 3).rgb;
+        vec3 ambient = sampleLODmanual(colortex4, project_skybox2uv(world_sun_dir), 3).rgb;
         ambient = ambient * 0.5 + dot(ambient, vec3(0.333)) * 0.5;
 
         color += cloud2d(world_pos, cameraPosition) * ambient;
