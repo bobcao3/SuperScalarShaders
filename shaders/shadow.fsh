@@ -10,6 +10,8 @@ in GeoOut {
 
 uniform sampler2D tex;
 
+/* RENDERTARGETS: 0 */
+
 void main()
 {
     float transparency = 0.5;
@@ -41,5 +43,5 @@ void main()
     else if (block_id == 32)
         color = vec3(1.0);
 
-    gl_FragColor = vec4(color * color, transparency);
+    gl_FragData[0] = vec4(color * color, transparency);
 }

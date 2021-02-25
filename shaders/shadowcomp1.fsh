@@ -2,10 +2,12 @@
 
 #pragma optimize(on)
 
-/* RENDERTARGETS: 3 */
+/* RENDERTARGETS: 1 */
 
-const bool colortex3Clear = false;
+const bool shadowcolor1Clear = false;
 const bool colortex5Clear = false;
 const bool colortex4Clear = false;
+
+#define FIRST
 
 #include "floodfill.glslinc"

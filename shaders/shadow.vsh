@@ -32,7 +32,7 @@ void main()
 
     vertex_color = gl_Color;
     vertex_world_pos = world_pos.xyz;
-    vertex_normal = world_normal * at_tangent.w;
+    vertex_normal = world_normal;// * at_tangent.w;
 
     block_id = int(mc_Entity.x);
     fluid = int(mc_Entity.y);

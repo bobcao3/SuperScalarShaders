@@ -4,7 +4,7 @@
 
 #include "libs/compat.glsl"
 
-/* RENDERTARGETS: 0,3 */
+/* RENDERTARGETS: 0 */
 
 uniform sampler2D shadowcolor0;
 uniform sampler2D shadowtex0;
@@ -47,42 +47,4 @@ void main()
     }
 
     gl_FragData[0] = vec4(color, 1.0);
-
-    if (iuv.x < volume_width * volume_depth_grid_width && iuv.y < volume_height * volume_depth_grid_height)
-    {
-        vec4 voxel_color = texelFetch(shadowcolor0, iuv, 0).rgba;
-        float voxel_attribute = texelFetch(shadowtex0, iuv, 0).r;
-
-        ivec3 volume_pos = planar2volume(iuv);
-        ivec3 prev_volume_pos = volume_pos + ivec3(floor(cameraPosition) - floor(previousCameraPosition));
-        ivec2 prev_planar_pos = volume2planar(prev_volume_pos);
-
-        vec4 prev_color = texelFetch(colortex3, prev_planar_pos, 0);
-        float prev_solid = prev_color.a;
-
-        if (voxel_color.a > 0.9 && (voxel_attribute < 0.54 || voxel_attribute > 0.56))
-        {
-            voxel_color = vec4(0.0);
-
-            if (prev_planar_pos != ivec2(-1))
-            {
-                voxel_color.rgb = prev_color.rgb * 0.95;
-            }
-        }
-        else
-        {
-            voxel_color.a = float(voxel_color.a < 0.9);
-
-            if (voxel_attribute > 0.54 && voxel_attribute < 0.56)
-            {
-                voxel_color.rgb = mix(prev_color.rgb, voxel_color.rgb * 20.0, 0.2);
-            }
-            else
-            {
-                voxel_color.rgb = vec3(0.0);
-            }
-        }
-
-        gl_FragData[1] = voxel_color;
-    }
 }

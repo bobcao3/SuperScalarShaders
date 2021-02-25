@@ -311,11 +311,11 @@ void main()
 
     vec3 sample_pos_smooth = world_position.xyz + normal * 0.51 + mod(cameraPosition, 1.0);
 
-#ifdef WATER
+// #ifdef WATER
     ivec3 ioffset = ivec3(0);
-#else
-    ivec3 ioffset = ivec3(floor(cameraPosition) - floor(previousCameraPosition));
-#endif
+// #else
+//     ivec3 ioffset = ivec3(floor(cameraPosition) - floor(previousCameraPosition));
+// #endif
 
     vec3 fade_distances = smoothstep(vec3(volume_width, volume_depth, volume_height) * 0.4f, vec3(volume_width, volume_depth, volume_height) * 0.5f, abs(world_position.xyz));
     float fade_distance = max(max(fade_distances.x, fade_distances.y), fade_distances.z);
@@ -434,7 +434,7 @@ void main()
                 #else
                 vec3 sample_pos = world_position.xyz + vertex_normal * 0.1 + sample_dir * (float(j) + hash1d);
                 #endif
-                ivec3 volume_pos = getVolumePos(sample_pos, cameraPosition);// + ioffset;
+                ivec3 volume_pos = getVolumePos(sample_pos, cameraPosition);
                 ivec2 planar_pos = volume2planar(volume_pos);
 
                 if (planar_pos == ivec2(-1)) break;

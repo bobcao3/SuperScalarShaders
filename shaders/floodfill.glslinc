@@ -1,22 +1,27 @@
+layout (rgba16f) uniform image2D colorimg5;
+
 uniform sampler2D shadowcolor0;
+uniform sampler2D shadowcolor1;
 uniform sampler2D shadowtex0;
 
 uniform sampler2D colortex3;
 
 #include "voxelize.glslinc"
 
+uniform vec3 cameraPosition;
+
 void main()
 {
     ivec2 iuv = ivec2(gl_FragCoord.st);
 
-    if (iuv.x >= volume_width * volume_depth_grid_width || iuv.y >= volume_height * volume_depth_grid_height) return;
+    // if (iuv.x >= volume_width * volume_depth_grid_width || iuv.y >= volume_height * volume_depth_grid_height) return;
 
     ivec3 world_pos = planar2volume(iuv);
     ivec2 planar_pos = volume2planar(world_pos);
 
     float voxel_solid = texelFetch(shadowcolor0, planar_pos, 0).a < 1.0 ? 1.0 : 0.0;
 
-    vec3 voxel_color = texelFetch(colortex3, planar_pos, 0).rgb;
+    vec3 voxel_color = texelFetch(shadowcolor1, planar_pos, 0).rgb;
 
     if (voxel_solid < 1.0)
     {
@@ -56,7 +61,7 @@ void main()
 
             if (planar_pos_sample == ivec2(-1)) continue;
 
-            vec3 sample_color = texelFetch(colortex3, planar_pos_sample, 0).rgb;
+            vec3 sample_color = texelFetch(shadowcolor1, planar_pos_sample, 0).rgb;
             vec4 sample_voxel_color = texelFetch(shadowcolor0, planar_pos_sample, 0).rgba;
             float sample_attribute = texelFetch(shadowtex0, planar_pos_sample, 0).r;
 
@@ -65,7 +70,11 @@ void main()
 
             if (sample_is_air) sample_color.rgb *= sample_voxel_color.rgb;
 
-            voxel_color = max(voxel_color, (sample_is_emmisive || sample_is_air) ? sample_color.rgb * 0.5 * multiplier[i] : vec3(0.0));
+#ifdef FIRST
+            voxel_color = max(voxel_color, (sample_is_emmisive || sample_is_air) ? sample_color.rgb * (0.55 / 0.7) * multiplier[i] : vec3(0.0));
+#else
+            voxel_color = max(voxel_color, (sample_is_emmisive || sample_is_air) ? sample_color.rgb * 0.55 * multiplier[i] : vec3(0.0));
+#endif
         }
     }
 
@@ -74,7 +83,16 @@ void main()
     #ifdef FINAL_PROP
     if (voxel_solid != 1.0)
     {
-        gl_FragData[1] = vec4(voxel_color * texelFetch(shadowcolor0, planar_pos, 0).rgb, voxel_solid);
+        // gl_FragData[1] = vec4(voxel_color * texelFetch(shadowcolor0, planar_pos, 0).rgb, voxel_solid);
+        imageStore(colorimg5, iuv, vec4(voxel_color * texelFetch(shadowcolor0, planar_pos, 0).rgb, voxel_solid));
+        
+    }
+    else
+    {
+        imageStore(colorimg5, iuv, vec4(0.0, 0.0, 0.0, voxel_solid));
+
     }
     #endif
+
+
 }
