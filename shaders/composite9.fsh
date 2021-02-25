@@ -30,6 +30,8 @@ uniform int biomeCategory;
 
 uniform int isEyeInWater;
 
+uniform sampler2D shadowcolor1;
+
 void main() {
     ivec2 iuv = ivec2(gl_FragCoord.st);
     
@@ -81,8 +83,8 @@ void main() {
             vec2 uv0 = volume2planarUV(vec3(spos.x, floor(spos.y), spos.z));
             vec2 uv1 = volume2planarUV(vec3(spos.x, ceil(spos.y), spos.z));
 
-            vec3 voxel_sample0 = texture(colortex5, uv0 * invWidthHeight).rgb;
-            vec3 voxel_sample1 = texture(colortex5, uv1 * invWidthHeight).rgb;
+            vec3 voxel_sample0 = texture(shadowcolor1, uv0 * vec2(1.0 / float(shadowMapResolution))).rgb;
+            vec3 voxel_sample1 = texture(shadowcolor1, uv1 * vec2(1.0 / float(shadowMapResolution))).rgb;
 
             vec3 voxel_sample = mix(voxel_sample0, voxel_sample1, fract(spos.y));
 

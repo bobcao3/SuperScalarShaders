@@ -35,8 +35,7 @@ uniform sampler2D normals;
 #endif
 
 uniform sampler2D tex;
-// uniform sampler2D colortex5;
-// uniform sampler2D colortex4;
+uniform sampler2D shadowcolor1;
 
 /* DRAWBUFFERS: 0 */
 
@@ -327,7 +326,7 @@ void main()
 #else
     if (fade_distance < 1.0)
     {
-        lighting = sample_lighting_bilinear(colortex5, sample_pos_smooth, ioffset);
+        lighting = sample_lighting_bilinear(shadowcolor1, sample_pos_smooth, ioffset);
 
         int handLightLevel = max(heldBlockLightValue, heldBlockLightValue2);
         float handLightLevel_f = float(handLightLevel) * (1.0 / 240.0);
@@ -453,7 +452,7 @@ void main()
                     ivec3 volume_pos_prev = getVolumePos(sample_pos - sample_dir * 0.5, cameraPosition) + ioffset;
                     ivec2 planar_pos_prev = volume2planar(volume_pos_prev);
 
-                    if (!is_lightsource) hitcolor *= max(skybox_color * pow2(lmcoord.y) * 0.7, texelFetch(colortex5, planar_pos_prev, 0).rgb);
+                    if (!is_lightsource) hitcolor *= max(skybox_color * pow2(lmcoord.y) * 0.7, texelFetch(shadowcolor1, planar_pos_prev, 0).rgb);
                     break;
                 }
             }

@@ -71,7 +71,7 @@ void main()
 
     color = ACESFitted(toGamma(color)) * 1.1;
 
-    // if (iuv.x < 1024 && iuv.y < 1024) color = texelFetch(colortex5, iuv, 0).rgb;
+    // if (iuv.x < 1024 && iuv.y < 1024) color = texelFetch(shadowcolor1, iuv, 0).rgb;
     // color = texelFetch(colortex4, iuv, 0).rgb;
     // color = sampleLODmanual(colortex4, uv, 5).rgb;
 

@@ -7,7 +7,5 @@
 #define FINAL_PROP
 
 const bool shadowcolor1Clear = false;
-const bool colortex5Clear = false;
-const bool colortex4Clear = false;
 
 #include "floodfill.glslinc"
