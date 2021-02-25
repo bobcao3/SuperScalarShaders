@@ -18,7 +18,9 @@ float linearizeDepth(in float d) {
     return (2 * near) / (far + near - (d * 2.0 - 1.0) * (far - near));
 }
 
-#define DOF
+// #define DOF
+
+#include "color.glslinc"
 
 #ifdef DOF
 void main()
@@ -47,6 +49,6 @@ void main()
     }
 
 /* DRAWBUFFERS:0 */
-    gl_FragData[0] = vec4(pow(color, vec3(1.0 / 2.2)), 1.0);
+    gl_FragData[0] = vec4(color, 1.0);
 }
 #endif

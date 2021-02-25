@@ -25,10 +25,6 @@ void main() {
     {
         color = texture(ORIGIN, uv * PREV_SCALE + PREV_BASE).rgb;
 
-        #ifdef IS_GAMMA
-        color = fromGamma(color);
-        #endif
-
         #ifdef BRIGHT_PASS
         color = color * smoothstep(3.0, 10.0, max(max(luma(color), color.r), max(color.g, color.b)));
         #endif

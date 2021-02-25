@@ -60,8 +60,9 @@ void main()
 
     vec2 average_uv = vertex_in[0].uv.xy;
 
-    vec3 actual_normal = normalize(cross(vertex_in[0].vertex_world_pos.xyz - vertex_in[1].vertex_world_pos.xyz, vertex_in[0].vertex_world_pos.xyz - vertex_in[2].vertex_world_pos.xyz));
-    
+    // vec3 actual_normal = normalize(cross(vertex_in[0].vertex_world_pos.xyz - vertex_in[1].vertex_world_pos.xyz, vertex_in[0].vertex_world_pos.xyz - vertex_in[2].vertex_world_pos.xyz));
+    vec3 actual_normal = vertex_in[0].vertex_normal;
+
     average_world_pos -= normalize(actual_normal) * 0.05;
 
     ivec3 block_pos = getVolumePos(average_world_pos, cameraPosition);

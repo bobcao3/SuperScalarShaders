@@ -24,5 +24,5 @@ void main()
 {
     vec4 color = vertex_color * texture(tex, uv);
 
-    gl_FragData[0] = color;
+    gl_FragData[0] = vec4(fromGamma(color.rgb), color.a);
 }

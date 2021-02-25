@@ -23,6 +23,6 @@ void main()
     gl_Position = proj_pos;
 
 #ifndef NO_TAA
-    gl_Position.st += JitterSampleOffset(frameCounter) * invWidthHeight * gl_Position.w;
+    gl_Position.st += taaOffset * gl_Position.w;
 #endif
 }

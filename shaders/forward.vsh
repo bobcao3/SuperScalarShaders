@@ -25,10 +25,14 @@ out VertexOut {
     vec2 miduv;
     flat vec2 bound_uv;
 
+    float fade_distance;
+
 #ifdef WIREFRAME
     vec4 bary;
 #endif
 };
+
+#include "/voxelize.glslinc"
 
 uniform mat4 gbufferModelViewInverse;
 
@@ -114,6 +118,9 @@ void main()
     }
 #endif
 
+    vec3 fade_distances = smoothstep(vec3(volume_width, volume_depth, volume_height) * 0.4f, vec3(volume_width, volume_depth, volume_height) * 0.5f, abs(world_position.xyz));
+    fade_distance = max(max(fade_distances.x, fade_distances.y), fade_distances.z);
+
     uv = gl_MultiTexCoord0.st;
 
 #if defined(NORMAL_MAPPING) || defined(WATER)
@@ -147,6 +154,6 @@ void main()
 #endif
 
 #ifndef NO_TAA
-    gl_Position.st += JitterSampleOffset(frameCounter) * invWidthHeight * gl_Position.w;
+    gl_Position.st += taaOffset * gl_Position.w;
 #endif
 }

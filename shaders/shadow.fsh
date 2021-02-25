@@ -41,5 +41,5 @@ void main()
     else if (block_id == 32)
         color = vec3(1.0);
 
-    gl_FragColor = vec4(color, transparency);
+    gl_FragColor = vec4(color * color, transparency);
 }
